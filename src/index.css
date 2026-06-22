@@ -1,2 +1,54 @@
+/* Reset */
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; }
+body { margin: 0; font-family: 'Zen Kaku Gothic New', system-ui, sans-serif; font-size: 15px; background: var(--bg); color: var(--ink); }
+h1, h2, h3, h4 { margin: 0; }
+button { cursor: pointer; font-family: inherit; }
+input, select { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* Animations */
+@keyframes pop {
+  from { opacity: 0; transform: scale(.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Theme: Farol (lantern) — default */
+:root {
+  --bg:        #14110f;
+  --bg2:       #1b1714;
+  --panel:     #201b17;
+  --panel2:    #28211b;
+  --line:      #3a2f27;
+  --line2:     #4a3c31;
+  --ink:       #f3ece2;
+  --dim:       #b3a596;
+  --faint:     #7d7065;
+  --accent:    #e0562d;
+  --accent2:   #f0a92b;
+  --accentInk: #1a0f08;
+  --good:      #56b083;
+  --bad:       #d8584f;
+}
+
+/* Theme: 4 Estaciones (seasons) */
+[data-theme="seasons"] {
+  --bg:        #0e1220;
+  --bg2:       #141a2c;
+  --panel:     #161c2e;
+  --panel2:    #1e253b;
+  --line:      #2b3450;
+  --line2:     #3a466a;
+  --ink:       #eef1fa;
+  --dim:       #9aa6c6;
+  --faint:     #6b769a;
+  --accent:    #d96a8f;
+  --accent2:   #5fb6a8;
+  --accentInk: #0b0f1a;
+  --good:      #5fb6a8;
+  --bad:       #e0708a;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
