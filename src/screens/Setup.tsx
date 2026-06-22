@@ -77,7 +77,7 @@ export default function Setup() {
   async function handleCodeChange(code: string) {
     store.setRegistrationCode(code);
     if (code) {
-      await supabase.from('tournaments').upsert({ code, name: t.name });
+      await supabase.from('tournaments').upsert({ code, name: t.name }, { onConflict: 'code' });
     }
   }
 
@@ -201,7 +201,7 @@ export default function Setup() {
         />
         {t.registrationCode && (
           <div style={{ fontSize: 12, color: 'var(--faint)', fontFamily: 'monospace', marginBottom: 12 }}>
-            {window.location.origin}/registro/{t.registrationCode}
+            https://shunka.vercel.app/registro/{t.registrationCode}
           </div>
         )}
 
