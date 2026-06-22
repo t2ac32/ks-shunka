@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Shippori+Mincho:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:#14110f;}
+  :root{
+    --sans:'Zen Kaku Gothic New',system-ui,sans-serif;
+    --serif:'Shippori Mincho',serif;
+    --bg:#14110f; --bg2:#1b1714; --panel:#201b17; --panel2:#28211b;
+    --line:#3a2f27; --line2:#4a3c31;
+    --ink:#f3ece2; --dim:#b3a596; --faint:#7d7065;
+    --accent:#e0562d; --accent2:#f0a92b; --accentInk:#1a0f08;
+    --good:#56b083; --bad:#d8584f; --winline:#f0a92b; --seal:#c9402f;
+  }
+  [data-theme="seasons"]{
+    --bg:#0e1220; --bg2:#141a2c; --panel:#161c2e; --panel2:#1e253b;
+    --line:#2b3450; --line2:#3a466a;
+    --ink:#eef1fa; --dim:#9aa6c6; --faint:#6b769a;
+    --accent:#d96a8f; --accent2:#5fb6a8; --accentInk:#0b0f1a;
+    --good:#5fb6a8; --bad:#e0708a; --winline:#d96a8f; --seal:#d96a8f;
+  }
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  input,select,button,textarea{font-family:inherit;color:inherit;}
+  select option{background:#201b17;color:#f3ece2;}
+  @keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes live{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}50%{box-shadow:0 0 0 5px transparent}}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--sans);background-image:radial-gradient(1100px 560px at 82% -12%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 60%);">
+
+  <header style="position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:11px clamp(13px,3vw,26px);background:color-mix(in srgb, var(--bg) 85%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+      <div style="font-family:var(--serif);font-weight:800;font-size:19px;letter-spacing:3px;color:var(--accent2);line-height:1;">春夏秋冬</div>
+      <div style="min-width:0;">
+        <div style="font-family:var(--serif);font-weight:700;font-size:clamp(14px,2vw,19px);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Shunka Shūtō no Kessen</div>
+        <div style="font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);">Kids Stop · Torneo de las 4 Estaciones</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:5px;margin-left:auto;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:4px;">
+      <button onClick="{{ goSetup }}" style="{{ tabSetup }}">Inscripción</button>
+      <button onClick="{{ goJudge }}" style="{{ tabJudge }}">Juez</button>
+      <button onClick="{{ goTV }}" style="{{ tabTV }}">Torneo · TV</button>
+    </nav>
+    <button onClick="{{ toggleTheme }}" title="Cambiar look" style="height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;flex:none;">
+      <span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block;"></span>{{ themeLabel }}
+    </button>
+  </header>
+
+  <!-- ============ SETUP ============ -->
+  <sc-if value="{{ showSetup }}" hint-placeholder-val="{{ true }}">
+  <main data-screen-label="Inscripción" style="max-width:780px;margin:0 auto;padding:clamp(16px,3vw,28px) clamp(13px,3vw,20px) 90px;">
+
+    <section style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="width:7px;height:18px;background:var(--accent);border-radius:2px;"></span>
+        <h2 style="margin:0;font-family:var(--serif);font-size:17px;font-weight:700;">Configuración</h2>
+      </div>
+      <label style="display:block;font-size:12px;color:var(--dim);margin-bottom:6px;">Nombre del torneo</label>
+      <input value="{{ name }}" onChange="{{ onName }}" placeholder="Nombre del torneo" style="width:100%;height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);font-size:15px;margin-bottom:16px;" />
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <div style="flex:1;min-width:170px;">
+          <label style="display:block;font-size:12px;color:var(--dim);margin-bottom:6px;">Sembrado</label>
+          <select value="{{ seedMode }}" onChange="{{ onSeedMode }}" style="width:100%;height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);font-size:14px;">
+            <option value="random">Aleatorio</option>
+            <option value="manual">Manual (orden de lista)</option>
+          </select>
+        </div>
+        <button onClick="{{ shuffle }}" style="height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);font-size:14px;cursor:pointer;">Barajar 🎲</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
+        <div style="font-size:13px;color:var(--dim);">
+          <b style="color:var(--ink);font-size:22px;font-family:var(--serif);">{{ playerCount }}</b> jugadores · <b style="color:var(--ink);">{{ readyCount }}</b> listos
+        </div>
+        <button onClick="{{ start }}" style="{{ startBtn }}">{{ startLabel }}</button>
+        <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ backToEdit }}" style="height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--line2);background:transparent;color:var(--dim);font-size:13px;cursor:pointer;">Editar lista</button>
+        </sc-if>
+      </div>
+      <p style="margin:11px 0 0;font-size:12px;color:var(--faint);line-height:1.5;">{{ setupHint }}</p>
+      <div style="display:flex;gap:9px;margin-top:15px;flex-wrap:wrap;">
+        <button onClick="{{ doExport }}" style="height:37px;padding:0 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);font-size:12.5px;cursor:pointer;">⬇ Exportar respaldo</button>
+        <label style="height:37px;padding:0 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;">⬆ Importar
+          <input type="file" accept="application/json,.json" onChange="{{ doImport }}" style="display:none;" />
+        </label>
+        <button onClick="{{ wipe }}" style="height:37px;padding:0 13px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--faint);font-size:12.5px;cursor:pointer;">Reiniciar todo</button>
+        <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ mock }}" style="height:37px;padding:0 13px;border-radius:9px;border:1px dashed var(--accent2);background:transparent;color:var(--accent2);font-size:12.5px;cursor:pointer;margin-left:auto;">🧪 Torneo de prueba</button>
+        </sc-if>
+      </div>
+    </section>
+
+    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+    <section style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:13px;">
+        <span style="width:7px;height:18px;background:var(--accent2);border-radius:2px;"></span>
+        <h2 style="margin:0;font-family:var(--serif);font-size:17px;font-weight:700;">Jugadores y mazos</h2>
+      </div>
+      <div style="display:flex;gap:9px;margin-bottom:18px;">
+        <input value="{{ newName }}" onChange="{{ onNewName }}" onKeyDown="{{ onNewKey }}" placeholder="Nombre del jugador" style="flex:1;height:46px;padding:0 14px;border-radius:11px;border:1px solid var(--line2);background:var(--bg2);font-size:15px;" />
+        <button onClick="{{ addPlayer }}" style="height:46px;padding:0 18px;border-radius:11px;border:none;background:var(--accent);color:var(--accentInk);font-weight:700;font-size:15px;cursor:pointer;flex:none;">Añadir</button>
+      </div>
+
+      <sc-for list="{{ playersVM }}" as="p" hint-placeholder-count="3">
+        <div style="background:var(--bg2);border:1px solid {{ p.borderCss }};border-radius:13px;padding:13px;margin-bottom:11px;animation:pop .16s ease;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
+            <span style="width:26px;height:26px;border-radius:7px;background:var(--panel2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--dim);flex:none;">{{ p.seedNo }}</span>
+            <input value="{{ p.name }}" onChange="{{ p.onRename }}" style="flex:1;min-width:0;height:36px;padding:0 10px;border-radius:8px;border:1px solid transparent;background:transparent;font-size:16px;font-weight:700;" />
+            <span style="{{ p.readyBadge }}">{{ p.readyText }}</span>
+            <button onClick="{{ p.remove }}" title="Eliminar" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--faint);font-size:15px;cursor:pointer;flex:none;">✕</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+            <sc-for list="{{ p.decks }}" as="d" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 8px;">
+                <span style="width:22px;height:22px;border-radius:50%;background:{{ d.dotCss }};flex:none;border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 0 0 2px rgba(0,0,0,.15);"></span>
+                <select value="{{ d.value }}" onChange="{{ d.onPick }}" style="flex:1;min-width:0;height:34px;border:none;background:transparent;font-size:13.5px;cursor:pointer;">
+                  <option value="">Mazo {{ d.slotNo }}…</option>
+                  <sc-for list="{{ archOptions }}" as="a" hint-placeholder-count="6">
+                    <option value="{{ a.id }}">{{ a.name }}</option>
+                  </sc-for>
+                  <option value="__custom">✎ Personalizado…</option>
+                </select>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noPlayers }}" hint-placeholder-val="{{ false }}">
+        <p style="text-align:center;color:var(--faint);font-size:13px;padding:18px 0;">Aún no hay jugadores. Añade el primero arriba.</p>
+      </sc-if>
+    </section>
+    </sc-if>
+
+    <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ false }}">
+      <p style="text-align:center;color:var(--faint);font-size:13px;margin-top:20px;">El torneo está en curso. Ve a <b style="color:var(--dim)">Juez</b> para registrar resultados o a <b style="color:var(--dim)">TV</b> para proyectar el bracket.</p>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ JUDGE ============ -->
+  <sc-if value="{{ showJudge }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Juez" style="max-width:560px;margin:0 auto;padding:clamp(14px,3vw,22px) clamp(12px,3vw,18px) 100px;">
+
+    <sc-if value="{{ judgeNotStarted }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:60px 20px;color:var(--faint);">
+        <div style="font-family:var(--serif);font-size:40px;color:var(--line2);margin-bottom:10px;">⚏</div>
+        <p style="font-size:14px;">El torneo aún no ha comenzado.<br>Ve a <b style="color:var(--dim)">Inscripción</b> e inicia el torneo.</p>
+      </div>
+    </sc-if>
+
+    <!-- match list -->
+    <sc-if value="{{ judgeListView }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <sc-if value="{{ champMsg }}" hint-placeholder-val="{{ false }}">
+          <div style="background:linear-gradient(135deg, color-mix(in srgb,var(--accent2) 30%,var(--panel)), var(--panel));border:1px solid var(--accent2);border-radius:16px;padding:22px;text-align:center;margin-bottom:18px;">
+            <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;">Campeón 優勝</div>
+            <div style="font-family:var(--serif);font-size:28px;font-weight:800;">🏆 {{ champName }}</div>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;align-items:center;gap:10px;margin:4px 0 14px;">
+          <span style="width:7px;height:18px;background:var(--accent);border-radius:2px;"></span>
+          <h2 style="margin:0;font-family:var(--serif);font-size:17px;font-weight:700;">Partidas por jugar</h2>
+          <span style="margin-left:auto;font-size:12px;color:var(--faint);">{{ liveCount }} activas</span>
+        </div>
+
+        <sc-for list="{{ liveMatches }}" as="m" hint-placeholder-count="3">
+          <button onClick="{{ m.open }}" style="display:block;width:100%;text-align:left;background:var(--panel);border:1px solid {{ m.borderCss }};border-radius:13px;padding:13px 14px;margin-bottom:10px;cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+              <span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:{{ m.tagBg }};color:{{ m.tagInk }};">{{ m.roundLabel }}</span>
+              <span style="font-size:11px;color:var(--faint);">{{ m.phaseLabel }}</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--accent2);font-weight:700;">{{ m.cta }} →</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="flex:1;text-align:right;font-weight:700;font-size:15px;min-width:0;">{{ m.p1Name }}</div>
+              <div style="display:flex;gap:5px;align-items:center;flex:none;">
+                <span style="{{ m.s1Css }}">{{ m.s1 }}</span>
+                <span style="color:var(--faint);font-size:12px;">·</span>
+                <span style="{{ m.s2Css }}">{{ m.s2 }}</span>
+              </div>
+              <div style="flex:1;text-align:left;font-weight:700;font-size:15px;min-width:0;">{{ m.p2Name }}</div>
+            </div>
+          </button>
+        </sc-for>
+        <sc-if value="{{ noLive }}" hint-placeholder-val="{{ false }}">
+          <p style="text-align:center;color:var(--faint);font-size:13px;padding:30px 0;">No hay partidas activas en este momento. Espera a que avancen las rondas o revisa la TV.</p>
+        </sc-if>
+
+        <sc-if value="{{ hasDone }}" hint-placeholder-val="{{ false }}">
+          <details style="margin-top:18px;">
+            <summary style="cursor:pointer;color:var(--dim);font-size:13px;padding:8px 0;">Partidas terminadas ({{ doneCount }})</summary>
+            <sc-for list="{{ doneMatches }}" as="m" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-top:7px;font-size:13px;">
+                <span style="font-size:10px;color:var(--faint);width:54px;flex:none;">{{ m.roundLabel }}</span>
+                <span style="flex:1;text-align:right;{{ m.w1Css }}">{{ m.p1Name }}</span>
+                <span style="color:var(--dim);font-weight:700;">{{ m.s1 }}–{{ m.s2 }}</span>
+                <span style="flex:1;{{ m.w2Css }}">{{ m.p2Name }}</span>
+                <button onClick="{{ m.open }}" style="flex:none;font-size:11px;color:var(--faint);background:none;border:none;cursor:pointer;text-decoration:underline;">editar</button>
+              </div>
+            </sc-for>
+          </details>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- match detail -->
+    <sc-if value="{{ detail }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:pop .14s ease;">
+        <button onClick="{{ closeDetail }}" style="background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;padding:4px 0;margin-bottom:8px;">← Volver</button>
+        <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:{{ dTagBg }};color:{{ dTagInk }};">{{ dRoundLabel }}</span>
+            <span style="font-size:12px;color:var(--faint);">Best of 3 · Conquista</span>
+          </div>
+
+          <!-- scoreboard -->
+          <div style="display:flex;align-items:stretch;gap:10px;margin-bottom:16px;">
+            <div style="flex:1;text-align:center;padding:12px;border-radius:12px;background:{{ d1Bg }};border:1px solid {{ d1Border }};">
+              <div style="font-weight:800;font-size:17px;margin-bottom:2px;">{{ dP1Name }}</div>
+              <div style="font-family:var(--serif);font-size:34px;font-weight:800;color:var(--accent2);">{{ dS1 }}</div>
+            </div>
+            <div style="display:flex;align-items:center;font-family:var(--serif);color:var(--faint);font-size:14px;">vs</div>
+            <div style="flex:1;text-align:center;padding:12px;border-radius:12px;background:{{ d2Bg }};border:1px solid {{ d2Border }};">
+              <div style="font-weight:800;font-size:17px;margin-bottom:2px;">{{ dP2Name }}</div>
+              <div style="font-family:var(--serif);font-size:34px;font-weight:800;color:var(--accent2);">{{ dS2 }}</div>
+            </div>
+          </div>
+
+          <!-- BAN phase -->
+          <sc-if value="{{ dBanPhase }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:13px;color:var(--dim);margin-bottom:12px;line-height:1.5;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;">
+                <b style="color:var(--ink);">Fase de baneo.</b> Cada jugador prohíbe <b>1 mazo</b> del rival. Quedan 3 mazos por jugador para el Bo3.
+              </div>
+
+              <div style="font-size:12px;color:var(--faint);margin:0 0 7px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">{{ dP2Name }} banea un mazo de {{ dP1Name }}</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+                <sc-for list="{{ dP1Decks }}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{ d.toggleBan }}" style="{{ d.banCss }}">
+                    <span style="width:20px;height:20px;border-radius:50%;background:{{ d.dotCss }};flex:none;border:1px solid rgba(255,255,255,.2);"></span>
+                    <span style="flex:1;text-align:left;">{{ d.label }}</span>
+                    <span style="font-size:11px;font-weight:700;">{{ d.banTag }}</span>
+                  </button>
+                </sc-for>
+              </div>
+
+              <div style="font-size:12px;color:var(--faint);margin:0 0 7px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">{{ dP1Name }} banea un mazo de {{ dP2Name }}</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;">
+                <sc-for list="{{ dP2Decks }}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{ d.toggleBan }}" style="{{ d.banCss }}">
+                    <span style="width:20px;height:20px;border-radius:50%;background:{{ d.dotCss }};flex:none;border:1px solid rgba(255,255,255,.2);"></span>
+                    <span style="flex:1;text-align:left;">{{ d.label }}</span>
+                    <span style="font-size:11px;font-weight:700;">{{ d.banTag }}</span>
+                  </button>
+                </sc-for>
+              </div>
+
+              <button onClick="{{ confirmBan }}" style="{{ banConfirmCss }}">{{ banConfirmLabel }}</button>
+            </div>
+          </sc-if>
+
+          <!-- PLAY phase -->
+          <sc-if value="{{ dPlayPhase }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <!-- played games -->
+              <sc-for list="{{ dGames }}" as="g" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:13px;background:var(--bg2);">
+                  <span style="font-size:11px;color:var(--faint);font-weight:700;flex:none;">G{{ g.no }}</span>
+                  <span style="display:flex;align-items:center;gap:6px;flex:1;{{ g.c1 }}"><span style="width:14px;height:14px;border-radius:50%;background:{{ g.dot1 }};flex:none;"></span>{{ g.deck1 }}</span>
+                  <span style="font-size:11px;color:var(--faint);flex:none;">{{ g.score }}</span>
+                  <span style="display:flex;align-items:center;gap:6px;flex:1;justify-content:flex-end;{{ g.c2 }}">{{ g.deck2 }}<span style="width:14px;height:14px;border-radius:50%;background:{{ g.dot2 }};flex:none;"></span></span>
+                  <button onClick="{{ g.undo }}" style="flex:none;background:none;border:none;color:var(--faint);font-size:14px;cursor:pointer;">✕</button>
+                </div>
+              </sc-for>
+
+              <!-- next game entry -->
+              <sc-if value="{{ dNeedGame }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px dashed var(--line2);border-radius:12px;padding:13px;margin-top:6px;">
+                  <div style="font-size:12px;color:var(--accent2);font-weight:700;margin-bottom:11px;">Juego {{ dNextNo }} — mazo distinto al que ya ganó cada quien</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                    <div>
+                      <div style="font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:700;">{{ dP1Name }}</div>
+                      <select value="{{ gSel1 }}" onChange="{{ onGSel1 }}" style="width:100%;height:40px;border-radius:9px;border:1px solid var(--line2);background:var(--bg2);padding:0 10px;font-size:13px;">
+                        <option value="">Mazo…</option>
+                        <sc-for list="{{ dP1Avail }}" as="o" hint-placeholder-count="3"><option value="{{ o.idx }}">{{ o.label }}</option></sc-for>
+                      </select>
+                    </div>
+                    <div>
+                      <div style="font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:700;">{{ dP2Name }}</div>
+                      <select value="{{ gSel2 }}" onChange="{{ onGSel2 }}" style="width:100%;height:40px;border-radius:9px;border:1px solid var(--line2);background:var(--bg2);padding:0 10px;font-size:13px;">
+                        <option value="">Mazo…</option>
+                        <sc-for list="{{ dP2Avail }}" as="o" hint-placeholder-count="3"><option value="{{ o.idx }}">{{ o.label }}</option></sc-for>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="font-size:12px;color:var(--faint);margin-bottom:8px;">¿Quién ganó el juego {{ dNextNo }}?</div>
+                  <div style="display:flex;gap:9px;">
+                    <button onClick="{{ winG1 }}" style="{{ winG1Css }}">Gana {{ dP1Name }}</button>
+                    <button onClick="{{ winG2 }}" style="{{ winG2Css }}">Gana {{ dP2Name }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ dMatchDone }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:14px;border-radius:12px;background:color-mix(in srgb,var(--good) 16%,var(--panel));border:1px solid color-mix(in srgb,var(--good) 45%,var(--line));margin-top:6px;">
+                  <div style="font-size:12px;color:var(--good);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Ganador de la ronda</div>
+                  <div style="font-family:var(--serif);font-size:22px;font-weight:800;">{{ dWinnerName }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ TV ============ -->
+  <sc-if value="{{ showTV }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="TV" style="height:calc(100vh - 60px);display:flex;flex-direction:column;overflow:hidden;">
+    <sc-if value="{{ tvNotStarted }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:auto;text-align:center;color:var(--faint);">
+        <div style="font-family:var(--serif);font-size:48px;color:var(--line2);">春夏秋冬</div>
+        <p style="font-size:15px;margin-top:8px;">El bracket aparecerá aquí cuando inicie el torneo.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tvHasBracket }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;min-height:0;position:relative;" ref="{{ wrapRef }}">
+        <div ref="{{ innerRef }}" style="position:absolute;top:0;left:50%;margin-left:-925px;width:1850px;padding:14px 4px;{{ stageCss }}">
+
+          <!-- title row -->
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:0 6px;">
+            <span style="font-family:var(--serif);font-weight:800;font-size:22px;letter-spacing:5px;color:var(--accent2);">春夏秋冬</span>
+            <span style="font-family:var(--serif);font-weight:700;font-size:21px;">{{ tvName }}</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:18px;">
+              <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim);"><span style="width:11px;height:11px;border-radius:3px;background:var(--accent);box-shadow:0 0 8px var(--accent);"></span>En juego</span>
+              <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim);"><span style="width:11px;height:11px;border-radius:3px;background:var(--accent2);"></span>Ganador</span>
+            </span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;">
+            <!-- left: winners + losers -->
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <!-- WINNERS -->
+              <section style="background:color-mix(in srgb,var(--panel) 55%,transparent);border:1px solid var(--line);border-radius:14px;padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                  <span style="width:6px;height:16px;background:var(--accent2);border-radius:2px;"></span>
+                  <h3 style="margin:0;font-family:var(--serif);font-size:15px;font-weight:700;letter-spacing:.04em;">Winners Bracket</h3>
+                  <span style="font-family:var(--serif);color:var(--faint);font-size:13px;">勝者</span>
+                </div>
+                <div style="display:flex;gap:22px;align-items:stretch;">
+                  <sc-for list="{{ wbCols }}" as="col" hint-placeholder-count="4">
+                    <div style="display:flex;flex-direction:column;">
+                      <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;text-align:center;margin-bottom:8px;height:14px;">{{ col.label }}</div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px;min-height:470px;">
+                        <sc-for list="{{ col.matches }}" as="c" hint-placeholder-count="4">
+                          <div style="{{ c.cardCss }}">
+                            <div style="{{ c.topCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.topName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.topScore }}</span></div>
+                            <div style="height:1px;background:var(--line);margin:1px 0;"></div>
+                            <div style="{{ c.botCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.botName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.botScore }}</span></div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+
+              <!-- LOSERS -->
+              <section style="background:color-mix(in srgb,var(--panel) 55%,transparent);border:1px solid var(--line);border-radius:14px;padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                  <span style="width:6px;height:16px;background:var(--dim);border-radius:2px;"></span>
+                  <h3 style="margin:0;font-family:var(--serif);font-size:15px;font-weight:700;letter-spacing:.04em;">Losers Bracket</h3>
+                  <span style="font-family:var(--serif);color:var(--faint);font-size:13px;">敗者</span>
+                </div>
+                <div style="display:flex;gap:18px;align-items:stretch;">
+                  <sc-for list="{{ lbCols }}" as="col" hint-placeholder-count="6">
+                    <div style="display:flex;flex-direction:column;">
+                      <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:700;text-align:center;margin-bottom:8px;height:14px;">{{ col.label }}</div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px;min-height:300px;">
+                        <sc-for list="{{ col.matches }}" as="c" hint-placeholder-count="4">
+                          <div style="{{ c.cardCss }}">
+                            <div style="{{ c.topCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.topName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.topScore }}</span></div>
+                            <div style="height:1px;background:var(--line);margin:1px 0;"></div>
+                            <div style="{{ c.botCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.botName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.botScore }}</span></div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </div>
+
+            <!-- right: grand final + champion -->
+            <div style="display:flex;flex-direction:column;justify-content:center;gap:16px;min-width:230px;align-self:stretch;">
+              <div style="background:linear-gradient(150deg,color-mix(in srgb,var(--accent2) 16%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--accent2) 40%,var(--line));border-radius:16px;padding:18px;text-align:center;">
+                <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);margin-bottom:4px;">Campeón 優勝</div>
+                <div style="font-size:34px;margin:4px 0;">🏆</div>
+                <div style="font-family:var(--serif);font-size:23px;font-weight:800;line-height:1.15;">{{ champName }}</div>
+              </div>
+              <div style="background:color-mix(in srgb,var(--panel) 55%,transparent);border:1px solid var(--line);border-radius:14px;padding:13px 14px;">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
+                  <span style="width:6px;height:16px;background:var(--accent);border-radius:2px;"></span>
+                  <h3 style="margin:0;font-family:var(--serif);font-size:15px;font-weight:700;">Gran Final</h3>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <sc-for list="{{ gfCards }}" as="c" hint-placeholder-count="1">
+                    <div style="{{ c.cardCss }}">
+                      <div style="{{ c.topCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.topName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.topScore }}</span></div>
+                      <div style="height:1px;background:var(--line);margin:1px 0;"></div>
+                      <div style="{{ c.botCss }}"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.botName }}</span><span style="font-family:var(--serif);font-weight:800;min-width:12px;text-align:right;">{{ c.botScore }}</span></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1100&quot;,&quot;height&quot;:&quot;760&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lantern&quot;,&quot;seasons&quot;],&quot;default&quot;:&quot;seasons&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.ARCHES = [
+      {id:'charizard', name:'Charizard ex', color:'#E8503A'},
+      {id:'dragapult', name:'Dragapult ex', color:'#9c5bd0'},
+      {id:'gardevoir', name:'Gardevoir ex', color:'#B45FB0'},
+      {id:'ragingbolt', name:'Raging Bolt ex', color:'#d2a72b'},
+      {id:'gholdengo', name:'Gholdengo ex', color:'#caa23c'},
+      {id:'miraidon', name:'Miraidon ex', color:'#F2C744'},
+      {id:'regidrago', name:'Regidrago VSTAR', color:'#c98a2a'},
+      {id:'lugia', name:'Lugia VSTAR', color:'#cfc7b0'},
+      {id:'lostbox', name:'Lost Zone Box', color:'#4A90D9'},
+      {id:'roaringmoon', name:'Roaring Moon ex', color:'#5a5470'},
+      {id:'ironthorns', name:'Iron Thorns ex', color:'#e0c14a'},
+      {id:'terapagos', name:'Terapagos ex', color:'#7fb9c9'},
+      {id:'snorlax', name:'Snorlax Stall', color:'#9aa0a8'},
+      {id:'pidgeot', name:'Pidgeot Control', color:'#b79b6a'},
+      {id:'grimmsnarl', name:'Grimmsnarl ex', color:'#6a5a8a'},
+      {id:'banette', name:'Banette ex', color:'#9b6fb0'},
+      {id:'archaludon', name:'Archaludon ex', color:'#7f8a9a'},
+      {id:'conkeldurr', name:'Conkeldurr', color:'#C0603A'},
+    ];
+    this.LS = 'shunka_v1';
+    this.wrapRef = React.createRef();
+    this.innerRef = React.createRef();
+    const loaded = this.load();
+    this.state = {
+      t: loaded || this.blankT(),
+      screen: 'setup',
+      newName: '',
+      selMatch: null,
+      tvZoom: 1,
+    };
+  }
+  blankT(){
+    return { id:'t_'+Date.now().toString(36), name:'Shunka Shūtō no Kessen — Otoño', theme:'lantern',
+      seedMode:'random', status:'setup', players:[], bk:null, savedAt:Date.now() };
+  }
+  // ---------- persistence ----------
+  load(){
+    try{ const r = localStorage.getItem(this.LS); return r ? JSON.parse(r) : null; }catch(e){ return null; }
+  }
+  persist(){
+    try{ this.state.t.savedAt = Date.now(); localStorage.setItem(this.LS, JSON.stringify(this.state.t)); }catch(e){}
+  }
+  commit(){ this.persist(); this.forceUpdate(); }
+
+  componentDidMount(){ this._onResize=()=>this.measureTV(); window.addEventListener('resize',this._onResize);
+    this.measureTV(); setTimeout(()=>this.measureTV(),250); setTimeout(()=>this.measureTV(),900); }
+  componentWillUnmount(){ if(this._onResize) window.removeEventListener('resize',this._onResize); }
+  componentDidUpdate(){ if(this.state.screen==='tv' && this.state.t.bk) this.measureTV(); }
+
+  // ---------- engine (inlined, tested) ----------
+  nextPow2(n){ let p=1; while(p<n) p*=2; return p; }
+  seedOrder(S){ let a=[1,2]; while(a.length<S){ const n=a.length*2; const x=[]; for(const s of a){x.push(s);x.push(n+1-s);} a=x; } return a; }
+  buildBracket(players){
+    const N=players.length, S=this.nextPow2(Math.max(2,N)), order=this.seedOrder(S), R=Math.round(Math.log2(S));
+    const matches={}, wb=[], lb=[];
+    const mk=(m)=>{ matches[m.id]=Object.assign({p1:null,p2:null,src1:null,src2:null,winner:null,loser:null,status:'pending',ban:{for1:null,for2:null},games:[],auto:false},m); };
+    for(let r=1;r<=R;r++){ const count=S/Math.pow(2,r); const row=[];
+      for(let s=0;s<count;s++){ const id='WB-'+r+'-'+s;
+        if(r===1){ const sa=order[2*s],sb=order[2*s+1]; const pa=sa<=N?players[sa-1].id:'BYE'; const pb=sb<=N?players[sb-1].id:'BYE';
+          mk({id,bracket:'WB',round:r,slot:s,p1:pa,p2:pb}); }
+        else mk({id,bracket:'WB',round:r,slot:s,src1:{type:'winner',match:'WB-'+(r-1)+'-'+(2*s)},src2:{type:'winner',match:'WB-'+(r-1)+'-'+(2*s+1)}});
+        row.push(id); } wb.push(row); }
+    const lbRounds=2*(R-1);
+    for(let i=1;i<=lbRounds;i++){ const row=[];
+      if(i===1){ const count=(S/2)/2; for(let s=0;s<count;s++){ const id='LB-1-'+s;
+        mk({id,bracket:'LB',round:1,slot:s,src1:{type:'loser',match:'WB-1-'+(2*s)},src2:{type:'loser',match:'WB-1-'+(2*s+1)}}); row.push(id); } }
+      else if(i%2===0){ const wbRound=i/2+1; const prev=lb[i-2]; const wbRow=wb[wbRound-1]; const count=prev.length;
+        for(let s=0;s<count;s++){ const id='LB-'+i+'-'+s; const wbL=wbRow[wbRow.length-1-s];
+          mk({id,bracket:'LB',round:i,slot:s,src1:{type:'winner',match:prev[s]},src2:{type:'loser',match:wbL}}); row.push(id); } }
+      else { const prev=lb[i-2]; const count=prev.length/2;
+        for(let s=0;s<count;s++){ const id='LB-'+i+'-'+s;
+          mk({id,bracket:'LB',round:i,slot:s,src1:{type:'winner',match:prev[2*s]},src2:{type:'winner',match:prev[2*s+1]}}); row.push(id); } }
+      lb.push(row); }
+    const wbFinal=wb[wb.length-1][0], lbFinal=lb[lb.length-1][0];
+    mk({id:'GF-1',bracket:'GF',round:1,slot:0,src1:{type:'winner',match:wbFinal},src2:{type:'winner',match:lbFinal}});
+    mk({id:'GF-2',bracket:'GF',round:2,slot:0,src1:{type:'winner',match:'GF-1'},src2:{type:'loserGF',match:'GF-1'},hidden:true});
+    return {matches,wb,lb,gf:['GF-1','GF-2'],S,R,N};
+  }
+  resolveBracket(bk){
+    const M=bk.matches;
+    const gs=(src)=>{ if(!src)return undefined; const m=M[src.match]; if(!m)return undefined;
+      if(src.type==='winner')return m.winner; if(src.type==='loser'||src.type==='loserGF')return m.loser; return undefined; };
+    let ch=true,g=0;
+    while(ch&&g<300){ ch=false; g++;
+      for(const id in M){ const m=M[id];
+        if(m.src1&&m.p1==null){ const v=gs(m.src1); if(v!=null){m.p1=v;ch=true;} }
+        if(m.src2&&m.p2==null){ const v=gs(m.src2); if(v!=null){m.p2=v;ch=true;} }
+        if(id==='GF-2'){ const g1=M['GF-1']; m.needed=g1.status==='done'&&g1.winner!=='BYE'&&g1.winnerSide==='lb'; }
+        if(m.status==='pending'||m.status==='banning'){
+          const a=m.p1,b=m.p2;
+          if(a==='BYE'&&b&&b!=='BYE'){ this.setResultRaw(bk,id,b,true); ch=true; }
+          else if(b==='BYE'&&a&&a!=='BYE'){ this.setResultRaw(bk,id,a,true); ch=true; }
+          else if(a==='BYE'&&b==='BYE'){ m.winner='BYE';m.loser='BYE';m.status='done';m.auto=true;ch=true; }
+          else if(a&&b&&a!=='BYE'&&b!=='BYE'&&m.status==='pending'){ m.status='banning'; }
+        }
+      }
+    }
+    return bk;
+  }
+  setResultRaw(bk,id,w,auto){ const m=bk.matches[id]; if(!m)return; m.winner=w; m.loser=(w===m.p1)?m.p2:m.p1; m.status='done'; m.auto=!!auto;
+    if(m.bracket==='GF') m.winnerSide=(w===m.p1)?'wb':'lb'; }
+  champion(bk){ if(!bk)return null; const g1=bk.matches['GF-1']; if(!g1||g1.status!=='done'||g1.winner==='BYE')return null;
+    if(g1.winnerSide==='wb')return g1.winner; const g2=bk.matches['GF-2']; if(g2&&g2.status==='done')return g2.winner; return null; }
+
+  // ---------- lookups ----------
+  pmap(){ const m={}; (this.state.t.players||[]).forEach(p=>m[p.id]=p); return m; }
+  pname(id){ if(id==='BYE')return 'BYE'; if(id==null)return null; const p=this.pmap()[id]; return p?p.name:'—'; }
+  deckLabel(arch){ if(!arch)return null; if(arch.custom)return arch.name; const a=this.ARCHES.find(x=>x.id===arch.id); return a?a.name:arch.id; }
+  deckColor(arch){ if(!arch)return 'var(--line2)'; if(arch.custom)return '#8a7d70'; const a=this.ARCHES.find(x=>x.id===arch.id); return a?a.color:'#8a7d70'; }
+
+  // ---------- setup actions ----------
+  setT(mut){ mut(this.state.t); this.commit(); }
+  addPlayer=()=>{ const n=(this.state.newName||'').trim(); if(!n)return;
+    this.state.t.players.push({id:'p_'+Date.now().toString(36)+'_'+this.state.t.players.length, name:n, decks:[null,null,null,null]});
+    this.state.newName=''; this.commit(); }
+  removePlayer(id){ this.state.t.players=this.state.t.players.filter(p=>p.id!==id); this.commit(); }
+  renamePlayer(id,v){ const p=this.pmap()[id]; if(p){p.name=v; this.commit();} }
+  pickDeck(pid,slot,val){ const p=this.pmap()[pid]; if(!p)return;
+    if(val==='__custom'){ const nm=window.prompt('Nombre del mazo personalizado:'); if(nm&&nm.trim()) p.decks[slot]={custom:true,name:nm.trim()}; }
+    else if(val==='') p.decks[slot]=null;
+    else p.decks[slot]={id:val};
+    this.commit(); }
+  playerReady(p){ return p.decks.filter(Boolean).length===4; }
+  shuffle=()=>{ const a=this.state.t.players; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } this.state.t.seedMode='random'; this.commit(); }
+  start=()=>{ const t=this.state.t; if(t.players.length<4){ alert('Se necesitan al menos 4 jugadores.'); return; }
+    const notReady=t.players.filter(p=>!this.playerReady(p)); 
+    if(notReady.length){ if(!confirm(notReady.length+' jugador(es) no tienen 4 mazos. ¿Iniciar de todos modos?')) return; }
+    let players=t.players.slice();
+    if(t.seedMode==='random'){ for(let i=players.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [players[i],players[j]]=[players[j],players[i]]; } t.players=players; }
+    t.bk=this.buildBracket(t.players); this.resolveBracket(t.bk); t.status='running'; this.state.screen='judge'; this.commit(); }
+  backToEdit=()=>{ if(confirm('Volver a edición descartará el bracket y los resultados actuales. ¿Continuar?')){ this.state.t.status='setup'; this.state.t.bk=null; this.commit(); } }
+  wipe=()=>{ if(confirm('Esto borra TODO el torneo de este dispositivo. ¿Seguro?')){ this.state.t=this.blankT(); this.state.screen='setup'; this.commit(); } }
+  onName=(e)=>{ this.state.t.name=e.target.value; this.commit(); }
+  onSeedMode=(e)=>{ this.state.t.seedMode=e.target.value; this.commit(); }
+  onNewName=(e)=>{ this.setState({newName:e.target.value}); }
+  onNewKey=(e)=>{ if(e.key==='Enter') this.addPlayer(); }
+  toggleTheme=()=>{ this.state.t.theme = this.state.t.theme==='lantern'?'seasons':'lantern'; this.commit(); }
+  mock=()=>{ const n=12; const NAMES=['Akira','Yuki','Sora','Ren','Hina','Kai','Mei','Taro','Nao','Riku','Emi','Jun','Haru','Aoi','Kenji','Mizuki','Daichi','Sakura','Ryo','Nami'];
+    if(this.state.t.players.length && !confirm('Esto reemplaza la lista actual con '+n+' jugadores de prueba. ¿Continuar?')) return;
+    const ids=this.ARCHES.map(a=>a.id);
+    const pick4=()=>{ const pool=ids.slice(); const out=[]; for(let k=0;k<4;k++){ out.push({id:pool.splice(Math.floor(Math.random()*pool.length),1)[0]}); } return out; };
+    const names=NAMES.slice().sort(()=>Math.random()-0.5).slice(0,n);
+    this.state.t.players=names.map((nm,i)=>({id:'p_'+Date.now().toString(36)+'_'+i, name:nm, decks:pick4()}));
+    this.commit(); }
+
+  // ---------- export / import ----------
+  doExport=()=>{ try{ const blob=new Blob([JSON.stringify(this.state.t,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download=(this.state.t.name||'torneo').replace(/[^\w\-]+/g,'_')+'.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1500); }catch(e){ alert('No se pudo exportar.'); } }
+  doImport=(e)=>{ const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader();
+    rd.onload=()=>{ try{ const obj=JSON.parse(rd.result); if(!obj||!obj.players){ alert('Archivo no válido.'); return; }
+      this.state.t=obj; this.state.screen=obj.status==='running'?'judge':'setup'; this.commit(); }catch(err){ alert('No se pudo leer el archivo.'); } };
+    rd.readAsText(f); e.target.value=''; }
+
+  // ---------- navigation ----------
+  go(s){ this.setState({screen:s, selMatch:null}); }
+
+  // ====================================================
+  renderVals(){
+    const t=this.state.t, scr=this.state.screen, running=t.status==='running';
+    const tabBase='height:30px;padding:0 13px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--dim);transition:.12s;';
+    const tabOn=tabBase+'background:var(--accent);color:var(--accentInk);';
+    const readyCount=(t.players||[]).filter(p=>this.playerReady(p)).length;
+    const playersVM=(t.players||[]).map((p,i)=>{
+      const ready=this.playerReady(p);
+      return {
+        id:p.id, name:p.name, seedNo:i+1,
+        borderCss: ready?'color-mix(in srgb,var(--good) 45%,var(--line))':'var(--line)',
+        readyBadge:'flex:none;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.04em;'+(ready?'background:color-mix(in srgb,var(--good) 22%,transparent);color:var(--good);':'background:var(--panel2);color:var(--faint);'),
+        readyText: p.decks.filter(Boolean).length+'/4',
+        onRename:(e)=>this.renamePlayer(p.id,e.target.value),
+        remove:()=>this.removePlayer(p.id),
+        decks:[0,1,2,3].map(s=>{ const d=p.decks[s]; return {
+          slotNo:s+1, value: d? (d.custom?'__custom':d.id) : '',
+          dotCss:this.deckColor(d),
+          onPick:(e)=>this.pickDeck(p.id,s,e.target.value),
+        };}),
+      };
+    });
+    const base={
+      theme:t.theme||'lantern',
+      themeLabel: (t.theme==='seasons')?'4 Estaciones':'Farol',
+      goSetup:()=>this.go('setup'), goJudge:()=>this.go('judge'), goTV:()=>this.go('tv'),
+      toggleTheme:this.toggleTheme,
+      tabSetup: scr==='setup'?tabOn:tabBase, tabJudge: scr==='judge'?tabOn:tabBase, tabTV: scr==='tv'?tabOn:tabBase,
+      showSetup: scr==='setup', showJudge: scr==='judge', showTV: scr==='tv',
+      // setup
+      name:t.name, seedMode:t.seedMode, onName:this.onName, onSeedMode:this.onSeedMode,
+      shuffle:this.shuffle, start:this.start, backToEdit:this.backToEdit, wipe:this.wipe,
+      doExport:this.doExport, doImport:this.doImport,
+      mock:this.mock,
+      playerCount:(t.players||[]).length, readyCount, noPlayers:(t.players||[]).length===0,
+      isRunning:running, canEdit:!running,
+      newName:this.state.newName, onNewName:this.onNewName, onNewKey:this.onNewKey, addPlayer:this.addPlayer,
+      playersVM, archOptions:this.ARCHES.map(a=>({id:a.id,name:a.name})),
+      startBtn:'height:42px;padding:0 20px;border-radius:10px;border:none;font-weight:700;font-size:15px;cursor:pointer;'+(running?'background:var(--panel2);color:var(--dim);':'background:var(--accent2);color:var(--accentInk);'),
+      startLabel: running?'Reiniciar bracket':'Iniciar torneo →',
+      setupHint: running?'Torneo en curso. Reiniciar el bracket vuelve a sortear el sembrado pero conserva jugadores y mazos.':'Mínimo 4 jugadores. Cada uno con 4 mazos. Al iniciar se genera el bracket de doble eliminación.',
+    };
+    Object.assign(base, this.judgeVM(), this.tvVM());
+    return base;
+  }
+  // ---------- match helpers ----------
+  labelFor(m,bk){
+    if(m.bracket==='GF') return m.round===1?'Gran Final':'Reset';
+    if(m.bracket==='WB') return m.round===bk.R?'Winners · Final':'Winners R'+m.round;
+    const last=bk.lb.length;
+    if(m.round===last) return 'Losers · Final';
+    if(m.round===last-1) return 'Losers · Semi';
+    return 'Losers R'+Math.ceil(m.round/1);
+  }
+  shortLabel(m,bk){
+    if(m.bracket==='GF') return m.round===1?'GF':'GF·R';
+    if(m.bracket==='WB') return m.round===bk.R?'WF':'W'+m.round;
+    const last=bk.lb.length; if(m.round===last) return 'LF';
+    return 'L'+m.round;
+  }
+  tagOf(b){
+    if(b==='GF') return {bg:'color-mix(in srgb,var(--accent) 26%,transparent)', ink:'var(--accent)'};
+    if(b==='WB') return {bg:'color-mix(in srgb,var(--accent2) 22%,transparent)', ink:'var(--accent2)'};
+    return {bg:'color-mix(in srgb,var(--dim) 16%,transparent)', ink:'var(--dim)'};
+  }
+  rank(m){ const b=m.bracket==='WB'?0:(m.bracket==='LB'?1:2); return b*1000+m.round*10+m.slot; }
+  wins(m){ let a=0,b=0; (m.games||[]).forEach(g=>{ if(g.winner==='p1')a++; else b++; }); return [a,b]; }
+  wonIdxSet(m,side){ const s=new Set(); (m.games||[]).forEach(g=>{ if(g.winner===side) s.add(side==='p1'?g.d1:g.d2); }); return s; }
+  availDecks(m,side){ const pid=side==='p1'?m.p1:m.p2; const p=this.pmap()[pid]; if(!p)return [];
+    const ban=side==='p1'?m.ban.for1:m.ban.for2; const won=this.wonIdxSet(m,side);
+    const out=[]; p.decks.forEach((d,i)=>{ if(d&&i!==ban&&!won.has(i)) out.push({idx:String(i),label:this.deckLabel(d)}); }); return out; }
+
+  // ---------- judge actions ----------
+  openMatch(id){ this.setState({selMatch:id, gSel1:'', gSel2:''}); }
+  closeDetail=()=>{ this.setState({selMatch:null}); }
+  setBan(side,idx){ const m=this.cur(); if(!m)return; if(side==='p1') m.ban.for1=(m.ban.for1===idx?null:idx); else m.ban.for2=(m.ban.for2===idx?null:idx); this.commit(); }
+  confirmBan=()=>{ const m=this.cur(); if(!m)return; if(m.ban.for1==null||m.ban.for2==null){ alert('Cada jugador debe banear un mazo del rival.'); return; } m.status='playing'; this.commit(); }
+  cur(){ const bk=this.state.t.bk; return bk?bk.matches[this.state.selMatch]:null; }
+  recordGame(winnerSide){ const m=this.cur(); if(!m)return; const s1=this.state.gSel1,s2=this.state.gSel2;
+    if(s1===''||s1==null||s2===''||s2==null){ alert('Selecciona el mazo de cada jugador.'); return; }
+    m.games.push({d1:+s1,d2:+s2,winner:winnerSide}); this.state.gSel1=''; this.state.gSel2='';
+    this.recomputeMatch(m); this.resolveBracket(this.state.t.bk); this.commit(); }
+  recomputeMatch(m){ const [a,b]=this.wins(m);
+    if(a>=2){ this.setResultRaw(this.state.t.bk,m.id,m.p1,false); }
+    else if(b>=2){ this.setResultRaw(this.state.t.bk,m.id,m.p2,false); }
+    else if(m.status==='done'){ m.winner=null;m.loser=null;m.status='playing'; if(m.bracket==='GF')m.winnerSide=null; this.resetDownstream(this.state.t.bk,m.id); } }
+  undoGame(idx){ const m=this.cur(); if(!m)return; if(!confirm('¿Eliminar este juego?'))return; m.games.splice(idx,1); this.recomputeMatch(m); this.resolveBracket(this.state.t.bk); this.commit(); }
+  resetDownstream(bk,matchId){ for(const id in bk.matches){ const m=bk.matches[id]; let hit=false;
+    if(m.src1&&m.src1.match===matchId){ m.p1=null; hit=true; } if(m.src2&&m.src2.match===matchId){ m.p2=null; hit=true; }
+    if(hit){ m.winner=null;m.loser=null;m.status='pending';m.games=[];m.ban={for1:null,for2:null};m.auto=false; if(m.bracket==='GF')m.winnerSide=null; this.resetDownstream(bk,id); } } }
+  onGSel1=(e)=>{ this.setState({gSel1:e.target.value}); }
+  onGSel2=(e)=>{ this.setState({gSel2:e.target.value}); }
+
+  // ---------- judge view model ----------
+  judgeVM(){
+    const t=this.state.t, bk=t.bk;
+    if(this.state.screen!=='judge') return {};
+    if(!bk || t.status!=='running') return { judgeNotStarted:true, judgeListView:false, detail:false };
+    const champId=this.champion(bk); const champName=champId?this.pname(champId):null;
+
+    // detail
+    const sel=this.state.selMatch; const m=sel?bk.matches[sel]:null;
+    const realMatch=m && m.p1&&m.p2&&m.p1!=='BYE'&&m.p2!=='BYE';
+    if(realMatch){
+      const [w1,w2]=this.wins(m); const tag=this.tagOf(m.bracket);
+      const p1=this.pmap()[m.p1], p2=this.pmap()[m.p2];
+      const deckBtn=(side)=>{ const p=side==='p1'?p1:p2; const ban=side==='p1'?m.ban.for1:m.ban.for2;
+        return (p?p.decks:[]).map((d,i)=>{ if(!d)return null; const isBan=ban===i;
+          return { label:this.deckLabel(d), dotCss:this.deckColor(d), banTag:isBan?'BANEADO':'banear',
+            banCss:'display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;text-align:left;'+(isBan?'background:color-mix(in srgb,var(--bad) 18%,transparent);border:1px solid var(--bad);color:var(--bad);text-decoration:line-through;':'background:var(--bg2);border:1px solid var(--line2);color:var(--ink);'),
+            toggleBan:()=>this.setBan(side,i) }; }).filter(Boolean); };
+      const banReady=m.ban.for1!=null&&m.ban.for2!=null;
+      const done=m.status==='done';
+      const cumScore=[]; { let a=0,b=0; (m.games||[]).forEach(g=>{ if(g.winner==='p1')a++;else b++; cumScore.push(a+'–'+b); }); }
+      const games=(m.games||[]).map((g,i)=>({ no:i+1, deck1:this.deckLabel(p1?p1.decks[g.d1]:null), deck2:this.deckLabel(p2?p2.decks[g.d2]:null),
+        dot1:this.deckColor(p1?p1.decks[g.d1]:null), dot2:this.deckColor(p2?p2.decks[g.d2]:null), score:cumScore[i],
+        c1:g.winner==='p1'?'color:var(--ink);font-weight:700;':'color:var(--faint);', c2:g.winner==='p2'?'color:var(--ink);font-weight:700;':'color:var(--faint);',
+        undo:()=>this.undoGame(i) }));
+      const a1=this.availDecks(m,'p1'), a2=this.availDecks(m,'p2');
+      const ready=this.state.gSel1!==''&&this.state.gSel1!=null&&this.state.gSel2!==''&&this.state.gSel2!=null;
+      const winBtn=(active)=>'flex:1;height:44px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;border:1px solid '+(active?'var(--good)':'var(--line2)')+';background:'+(active?'color-mix(in srgb,var(--good) 20%,var(--panel))':'var(--panel2)')+';color:'+(active?'var(--ink)':'var(--dim)')+';';
+      return {
+        judgeNotStarted:false, judgeListView:false, detail:true, closeDetail:this.closeDetail,
+        dRoundLabel:this.labelFor(m,bk), dTagBg:tag.bg, dTagInk:tag.ink,
+        dP1Name:p1?p1.name:'—', dP2Name:p2?p2.name:'—', dS1:w1, dS2:w2,
+        d1Bg:w1>w2?'color-mix(in srgb,var(--accent2) 12%,var(--panel2))':'var(--panel2)', d2Bg:w2>w1?'color-mix(in srgb,var(--accent2) 12%,var(--panel2))':'var(--panel2)',
+        d1Border:w1>=2?'var(--accent2)':'var(--line2)', d2Border:w2>=2?'var(--accent2)':'var(--line2)',
+        dBanPhase:m.status==='banning', dPlayPhase:m.status==='playing'||done,
+        dP1Decks:deckBtn('p1'), dP2Decks:deckBtn('p2'),
+        confirmBan:this.confirmBan, banConfirmLabel: banReady?'Confirmar baneos y empezar Bo3 →':'Selecciona un baneo por jugador',
+        banConfirmCss:'width:100%;height:46px;border-radius:11px;border:none;font-weight:700;font-size:15px;cursor:'+(banReady?'pointer':'not-allowed')+';background:'+(banReady?'var(--accent)':'var(--panel2)')+';color:'+(banReady?'var(--accentInk)':'var(--faint)')+';',
+        dGames:games, dNeedGame:!done&&m.status==='playing', dMatchDone:done,
+        dNextNo:(m.games||[]).length+1, dWinnerName:done?this.pname(m.winner):'',
+        dP1Avail:a1, dP2Avail:a2, gSel1:this.state.gSel1||'', gSel2:this.state.gSel2||'', onGSel1:this.onGSel1, onGSel2:this.onGSel2,
+        winG1:()=>this.recordGame('p1'), winG2:()=>this.recordGame('p2'),
+        winG1Css:winBtn(ready), winG2Css:winBtn(ready),
+      };
+    }
+
+    // list
+    const all=Object.values(bk.matches);
+    const live=all.filter(x=> (x.id!=='GF-2'||x.needed) && (x.status==='banning'||x.status==='playing') && x.p1&&x.p2&&x.p1!=='BYE'&&x.p2!=='BYE')
+      .sort((a,b)=>this.rank(a)-this.rank(b))
+      .map(x=>{ const [s1,s2]=this.wins(x); const tag=this.tagOf(x.bracket); const playing=x.status==='playing';
+        const sc=(n,lead)=>'min-width:22px;text-align:center;font-family:var(--serif);font-weight:800;font-size:16px;color:'+(lead?'var(--accent2)':'var(--dim)')+';';
+        return { id:x.id, open:()=>this.openMatch(x.id), roundLabel:this.labelFor(x,bk), tagBg:tag.bg, tagInk:tag.ink,
+          phaseLabel: playing?'Bo3 en juego':'Baneo pendiente', cta: playing?'Continuar':'Registrar',
+          borderCss: playing?'color-mix(in srgb,var(--accent) 50%,var(--line))':'var(--line2)',
+          p1Name:this.pname(x.p1), p2Name:this.pname(x.p2), s1, s2,
+          s1Css:sc(s1,s1>s2), s2Css:sc(s2,s2>s1) }; });
+    const done=all.filter(x=>x.status==='done'&&!x.auto&&x.winner!=='BYE'&&x.p1!=='BYE'&&x.p2!=='BYE')
+      .sort((a,b)=>this.rank(a)-this.rank(b))
+      .map(x=>{ const [s1,s2]=this.wins(x);
+        return { id:x.id, open:()=>this.openMatch(x.id), roundLabel:this.shortLabel(x,bk),
+          p1Name:this.pname(x.p1), p2Name:this.pname(x.p2), s1, s2,
+          w1Css:x.winner===x.p1?'font-weight:700;':'color:var(--faint);', w2Css:x.winner===x.p2?'font-weight:700;':'color:var(--faint);' }; });
+    return {
+      judgeNotStarted:false, judgeListView:true, detail:false,
+      champMsg:!!champId, champName,
+      liveMatches:live, liveCount:live.length, noLive:live.length===0,
+      doneMatches:done, doneCount:done.length, hasDone:done.length>0,
+    };
+  }
+  // ---------- TV ----------
+  measureTV(){ const w=this.wrapRef&&this.wrapRef.current, inner=this.innerRef&&this.innerRef.current; if(!w||!inner)return;
+    const natW=inner.scrollWidth, natH=inner.scrollHeight; if(!natW||!natH)return;
+    let sc=Math.min((w.clientWidth-6)/natW,(w.clientHeight-6)/natH); sc=Math.max(.25,Math.min(sc,1.9));
+    if(Math.abs(sc-(this.state.tvScale||1))>0.012) this.setState({tvScale:sc}); }
+  colLabel(i,total,letter){ if(i===total-1)return 'Final'; if(i===total-2)return 'Semifinal'; return (letter||'Ronda ')+(letter?(i+1):(i+1)); }
+  tvCard(id){ const bk=this.state.t.bk, m=bk.matches[id]; const [w1,w2]=this.wins(m);
+    const side=(pid,wins,isWin,isLoseDone)=>{ let name,bye=false,tbd=false;
+      if(pid==='BYE'){name='BYE';bye=true;} else if(pid==null){name='Por definir';tbd=true;} else name=this.pname(pid);
+      const showScore=(m.status==='playing'||m.status==='done')&&!bye&&!tbd;
+      const css='display:flex;align-items:center;gap:7px;height:23px;font-size:13px;'+
+        (tbd||bye?'color:var(--faint);font-style:italic;':(isWin?'color:var(--accent2);font-weight:800;':(isLoseDone?'color:var(--faint);text-decoration:line-through;font-weight:600;':'color:var(--ink);font-weight:600;')));
+      return {name,css,score:showScore?String(wins):'', dot:(!bye&&!tbd)};
+    };
+    const done=m.status==='done'&&m.winner!=='BYE';
+    const top=side(m.p1,w1, done&&m.winner===m.p1, done&&m.winner!==m.p1);
+    const bot=side(m.p2,w2, done&&m.winner===m.p2, done&&m.winner!==m.p2);
+    const real=m.p1&&m.p2&&m.p1!=='BYE'&&m.p2!=='BYE';
+    const live=real&&(m.status==='banning'||m.status==='playing');
+    const pending=!real&&!done;
+    const tag=this.tagOf(m.bracket);
+    const cardCss='width:160px;background:var(--panel);border-radius:9px;padding:5px 9px;'+
+      (live?'border:1px solid var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent),0 4px 16px color-mix(in srgb,var(--accent) 22%,transparent);':
+        (done?'border:1px solid color-mix(in srgb,var(--accent2) 30%,var(--line));':'border:1px solid var(--line);'))+
+      (pending?'opacity:.45;':'');
+    return { id, cardCss, topName:top.name, topScore:top.score, topCss:top.css,
+      botName:bot.name, botScore:bot.score, botCss:bot.css,
+      live, liveTag: live?(m.status==='playing'?'EN JUEGO':'BANEO'):'' };
+  }
+  tvVM(){
+    const t=this.state.t, bk=t.bk;
+    if(this.state.screen!=='tv') return {};
+    if(!bk){ return { tvNotStarted:true, tvHasBracket:false }; }
+    const wbCols=bk.wb.map((row,i)=>({ label:this.colLabel(i,bk.wb.length), matches:row.map(id=>this.tvCard(id)) }));
+    const lbCols=bk.lb.map((row,i)=>({ label:this.colLabel(i,bk.lb.length,'Ronda '), matches:row.map(id=>this.tvCard(id)) }));
+    const gfCards=[this.tvCard('GF-1')]; if(bk.matches['GF-2'].needed) gfCards.push(this.tvCard('GF-2'));
+    const champId=this.champion(bk); const champName=champId?this.pname(champId):null;
+    const sc=this.state.tvScale||1;
+    return {
+      tvNotStarted:false, tvHasBracket:true,
+      wrapRef:this.wrapRef, innerRef:this.innerRef,
+      stageCss:'transform:scale('+sc+');transform-origin:top center;',
+      wbCols, lbCols, gfCards,
+      champShow:!!champId, champName: champName||'Por definir',
+      tvName:t.name,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="lantern">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulación 8 Jugadores · Shunka Shūtō no Kessen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Shippori+Mincho:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#14110f; --bg2:#1b1714; --panel:#201b17; --panel2:#28211b;
+      --line:#3a2f27; --line2:#4a3c31; --ink:#f3ece2; --dim:#b3a596;
+      --faint:#7d7065; --accent:#e0562d; --accent2:#f0a92b;
+      --accentInk:#1a0f08; --good:#56b083; --bad:#d8584f;
+    }
+    [data-theme="seasons"] {
+      --bg:#0e1220; --bg2:#141a2c; --panel:#161c2e; --panel2:#1e253b;
+      --line:#2b3450; --line2:#3a466a; --ink:#eef1fa; --dim:#9aa6c6;
+      --faint:#6b769a; --accent:#d96a8f; --accent2:#5fb6a8;
+      --accentInk:#0b0f1a; --good:#5fb6a8; --bad:#e0708a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--ink);font-family:'Zen Kaku Gothic New',system-ui,sans-serif;min-height:100vh;}
+
+    /* ── Header ── */
+    header{
+      position:sticky;top:0;z-index:10;
+      background:color-mix(in srgb,var(--bg) 85%,transparent);
+      backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+      padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .h-left{display:flex;align-items:center;gap:12px;}
+    .kanji{font-family:'Shippori Mincho',serif;font-size:18px;color:var(--accent2);font-weight:700;}
+    .h-title h1{font-family:'Shippori Mincho',serif;font-size:15px;font-weight:700;}
+    .h-title p{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;}
+    .h-right{display:flex;gap:8px;}
+    .ctrl{
+      background:var(--panel);border:1px solid var(--line2);color:var(--dim);
+      padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;
+      transition:all .15s;
+    }
+    .ctrl:hover{background:var(--panel2);color:var(--ink);}
+
+    /* ── Layout ── */
+    main{padding:20px;}
+    .info-banner{
+      background:var(--panel);border:1px solid var(--line);border-radius:12px;
+      padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--dim);line-height:1.6;
+    }
+    .info-banner strong{color:var(--accent2);}
+
+    .alert-banner{
+      background:color-mix(in srgb,var(--accent) 12%,var(--panel));
+      border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));
+      border-radius:12px;padding:12px 16px;margin-bottom:16px;
+      font-size:12.5px;color:var(--ink);line-height:1.6;display:none;
+    }
+    .alert-banner.visible{display:block;}
+    .alert-banner strong{color:var(--accent);}
+
+    .bracket-outer{display:flex;gap:20px;align-items:flex-start;}
+    .bracket-main{flex:1;display:flex;flex-direction:column;gap:20px;min-width:0;}
+    .bracket-side{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+
+    /* ── Section headers ── */
+    .section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .s-bar{width:3px;height:18px;border-radius:2px;flex-shrink:0;}
+    .s-bar.wb{background:var(--accent2);}
+    .s-bar.lb{background:var(--dim);}
+    .s-bar.gf{background:var(--accent);}
+    .s-title{font-family:'Shippori Mincho',serif;font-size:14px;font-weight:700;}
+    .s-kanji{font-family:'Shippori Mincho',serif;font-size:12px;color:var(--faint);}
+
+    /* ── Round columns ── */
+    .rounds-row{display:flex;gap:12px;align-items:stretch;}
+    .round-col{display:flex;flex-direction:column;min-width:172px;}
+    .round-label{
+      font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--faint);text-align:center;padding:3px 0;
+      border-bottom:1px solid var(--line);margin-bottom:8px;
+    }
+    .matches-col{display:flex;flex-direction:column;gap:8px;justify-content:space-around;flex:1;}
+
+    /* ── Match card ── */
+    .match-card{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s,opacity .2s;
+    }
+    .match-card.active{
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent),
+                 0 4px 14px color-mix(in srgb,var(--accent) 18%,transparent);
+    }
+    .match-card.done{border-color:var(--line2);}
+    .match-card.pending{opacity:.38;}
+
+    .m-id{
+      font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+      text-align:center;padding:3px 8px;background:var(--panel2);border-bottom:1px solid var(--line);
+    }
+    .p-row{
+      display:flex;align-items:center;gap:8px;padding:7px 10px;
+      border-bottom:1px solid var(--line);
+    }
+    .p-row:last-child{border-bottom:none;}
+    .p-row.row-win{background:color-mix(in srgb,var(--accent2) 10%,transparent);}
+    .p-row.row-lose{opacity:.38;}
+
+    .p-name{
+      flex:1;font-size:13px;font-weight:700;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .p-name.w{color:var(--accent2);}
+    .p-name.tbd{color:var(--faint);font-style:italic;font-weight:400;font-size:11px;}
+
+    .win-btn{
+      font-size:10px;padding:2px 8px;background:var(--panel2);
+      border:1px solid var(--line2);border-radius:5px;color:var(--dim);
+      cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0;
+    }
+    .win-btn:hover{background:var(--accent2);color:var(--accentInk);border-color:var(--accent2);font-weight:700;}
+    .w-badge{font-family:'Shippori Mincho',serif;font-size:13px;font-weight:800;color:var(--accent2);flex-shrink:0;}
+
+    /* ── Right side ── */
+    .sect-divider{height:1px;background:var(--line);margin:4px 0;}
+
+    .gf-card{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:14px;padding:14px;
+    }
+    .gf2-tag{font-size:10px;color:var(--faint);text-align:center;font-style:italic;margin:8px 0 4px;}
+
+    .champ-card{
+      background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 18%,var(--panel)),var(--panel));
+      border:1px solid color-mix(in srgb,var(--accent2) 35%,var(--line));
+      border-radius:14px;padding:18px;text-align:center;
+    }
+    .champ-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:4px;}
+    .champ-trophy{font-size:28px;margin-bottom:8px;}
+    .champ-name{font-family:'Shippori Mincho',serif;font-size:17px;font-weight:700;color:var(--accent2);}
+    .champ-placeholder{color:var(--faint);font-style:italic;font-size:13px;}
+
+    /* ── Placements ── */
+    .placements{
+      margin-top:24px;background:var(--panel);border:1px solid var(--line);
+      border-radius:14px;padding:16px;
+    }
+    .placements h2{font-family:'Shippori Mincho',serif;font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:12px;}
+    .pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+    .pl-item{
+      background:var(--bg2);border:1px solid var(--line);border-radius:9px;
+      padding:9px 12px;display:flex;align-items:center;gap:9px;
+    }
+    .pl-pos{font-family:'Shippori Mincho',serif;font-size:15px;font-weight:800;color:var(--faint);min-width:36px;}
+    .pl-pos.top3{color:var(--accent2);}
+    .pl-player{font-size:13px;font-weight:700;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pl-player.filled{color:var(--ink);}
+
+    .reset-row{margin-top:16px;display:flex;justify-content:flex-end;}
+  </style>
+</head>
+<body>
+<header>
+  <div class="h-left">
+    <span class="kanji">春夏秋冬</span>
+    <div class="h-title">
+      <h1>Shunka Shūtō no Kessen</h1>
+      <p>Simulación · Bracket 8 Jugadores · Doble Eliminación</p>
+    </div>
+  </div>
+  <div class="h-right">
+    <button class="ctrl" id="theme-toggle">Farol ⇄ 4 Est.</button>
+    <button class="ctrl" id="reset-btn">↺ Reiniciar</button>
+  </div>
+</header>
+
+<main>
+  <div class="info-banner">
+    <strong>Cómo simular:</strong> Haz clic en <strong>"Ganar"</strong> junto al jugador que gana cada partida.
+    El perdedor del WB cae al LB. El perdedor del LB queda eliminado.
+    Se necesitan <strong>2 derrotas</strong> para salir. La Gran Final puede tener <strong>reset (GF-2)</strong> si gana el lado LB.
+  </div>
+
+  <div class="alert-banner" id="three-alert">
+    <strong>⚠ Momento de 3 jugadores en LB:</strong>
+    El perdedor del WB Final ya está esperando en el LB mientras se juega la Semifinal LB.
+    Los 3 jugadores convergen en la <strong>Final LB</strong>: el ganador de LB Semifinal se enfrenta al perdedor del WB Final.
+    El que salga de ahí va a la Gran Final.
+  </div>
+
+  <div class="bracket-outer">
+    <div class="bracket-main">
+      <div>
+        <div class="section-head">
+          <div class="s-bar wb"></div>
+          <span class="s-title">Winners Bracket</span>
+          <span class="s-kanji">勝者</span>
+        </div>
+        <div class="rounds-row" id="wb-rounds"></div>
+      </div>
+
+      <div class="sect-divider"></div>
+
+      <div>
+        <div class="section-head">
+          <div class="s-bar lb"></div>
+          <span class="s-title">Losers Bracket</span>
+          <span class="s-kanji">敗者</span>
+        </div>
+        <div class="rounds-row" id="lb-rounds"></div>
+      </div>
+    </div>
+
+    <div class="bracket-side">
+      <div class="champ-card">
+        <div class="champ-label">Campeón · 優勝</div>
+        <div class="champ-trophy">🏆</div>
+        <div id="champ-name" class="champ-placeholder">Por definir</div>
+      </div>
+      <div class="gf-card">
+        <div class="section-head">
+          <div class="s-bar gf"></div>
+          <span class="s-title">Gran Final</span>
+        </div>
+        <div id="gf-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="placements">
+    <h2>Clasificación · 順位</h2>
+    <div class="pl-grid" id="pl-grid"></div>
+  </div>
+  <div class="reset-row">
+    <button class="ctrl" id="reset-btn2">↺ Reiniciar simulación</button>
+  </div>
+</main>
+
+<script>
+// ── PLAYERS ────────────────────────────────────────────────────────────────
+const PLAYERS = [
+  {id:'p1',name:'Haruto'},{id:'p2',name:'Minato'},{id:'p3',name:'Akira'},
+  {id:'p4',name:'Natsu'},{id:'p5',name:'Kaito'},{id:'p6',name:'Sora'},
+  {id:'p7',name:'Yuki'},{id:'p8',name:'Ren'},
+];
+
+function pname(id){ return id?(PLAYERS.find(p=>p.id===id)||{name:id}).name:null; }
+
+// ── SEEDING ────────────────────────────────────────────────────────────────
+function seedOrder(S){
+  if(S===1)return[0];
+  const h=S/2,prev=seedOrder(h);
+  return prev.flatMap(i=>[i,S-1-i]);
+}
+
+// ── MATCH DEFINITIONS ──────────────────────────────────────────────────────
+// s1/s2: {t:'W'|'L', m:'MATCH-ID'} = winner or loser of that match feeds here
+// lbl: display label override
+const DEFS = {
+  'WB-1-0':{br:'WB',r:1},
+  'WB-1-1':{br:'WB',r:1},
+  'WB-1-2':{br:'WB',r:1},
+  'WB-1-3':{br:'WB',r:1},
+  'WB-2-0':{br:'WB',r:2,s1:{t:'W',m:'WB-1-0'},s2:{t:'W',m:'WB-1-1'}},
+  'WB-2-1':{br:'WB',r:2,s1:{t:'W',m:'WB-1-2'},s2:{t:'W',m:'WB-1-3'}},
+  'WB-3-0':{br:'WB',r:3,s1:{t:'W',m:'WB-2-0'},s2:{t:'W',m:'WB-2-1'},lbl:'Final WB'},
+  'LB-1-0':{br:'LB',r:1,s1:{t:'L',m:'WB-1-0'},s2:{t:'L',m:'WB-1-1'}},
+  'LB-1-1':{br:'LB',r:1,s1:{t:'L',m:'WB-1-2'},s2:{t:'L',m:'WB-1-3'}},
+  'LB-2-0':{br:'LB',r:2,s1:{t:'L',m:'WB-2-0'},s2:{t:'W',m:'LB-1-0'}},
+  'LB-2-1':{br:'LB',r:2,s1:{t:'L',m:'WB-2-1'},s2:{t:'W',m:'LB-1-1'}},
+  'LB-3-0':{br:'LB',r:3,s1:{t:'W',m:'LB-2-0'},s2:{t:'W',m:'LB-2-1'},lbl:'Semifinal LB'},
+  'LB-4-0':{br:'LB',r:4,s1:{t:'L',m:'WB-3-0'},s2:{t:'W',m:'LB-3-0'},lbl:'Final LB'},
+  'GF-1':  {br:'GF',r:1,s1:{t:'W',m:'WB-3-0'},s2:{t:'W',m:'LB-4-0'}},
+  'GF-2':  {br:'GF',r:2}, // activated only when LB side wins GF-1
+};
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let S = {};
+
+function initState(){
+  S = {};
+  Object.keys(DEFS).forEach(id=>{
+    S[id]={id,p1:null,p2:null,winner:null,loser:null,status:'pending',gf2needed:false};
+  });
+  const ord = seedOrder(8);
+  const seeded = ord.map(i=>PLAYERS[i].id);
+  // seeded = [p1,p8,p4,p5,p2,p7,p3,p6] → matchups: 1v8, 4v5, 2v7, 3v6
+  [['WB-1-0',0,1],['WB-1-1',2,3],['WB-1-2',4,5],['WB-1-3',6,7]].forEach(([id,a,b])=>{
+    S[id].p1=seeded[a]; S[id].p2=seeded[b]; S[id].status='active';
+  });
+}
+
+function resolve(src){
+  if(!src)return null;
+  const m=S[src.m];
+  if(!m||m.status!=='done')return null;
+  return src.t==='W'?m.winner:m.loser;
+}
+
+function propagate(){
+  let changed=true,iter=0;
+  while(changed&&iter++<20){
+    changed=false;
+    Object.keys(DEFS).forEach(id=>{
+      const m=S[id];
+      if(m.status==='done')return;
+      if(id==='GF-2'){
+        const gf1=S['GF-1'];
+        if(gf1.status==='done'&&gf1.gf2needed&&m.status==='pending'){
+          m.p1=gf1.p1; m.p2=gf1.p2; m.status='active'; changed=true;
+        }
+        return;
+      }
+      const def=DEFS[id];
+      if(!m.p1&&def.s1){const v=resolve(def.s1);if(v){m.p1=v;changed=true;}}
+      if(!m.p2&&def.s2){const v=resolve(def.s2);if(v){m.p2=v;changed=true;}}
+      if(m.p1&&m.p2&&m.status==='pending'){m.status='active';changed=true;}
+    });
+  }
+}
+
+function pickWinner(matchId,pid){
+  const m=S[matchId];
+  if(m.status!=='active')return;
+  m.winner=pid;
+  m.loser=m.p1===pid?m.p2:m.p1;
+  m.status='done';
+  if(matchId==='GF-1'&&pid===m.p2) m.gf2needed=true;
+  propagate();
+  render();
+}
+
+// ── RENDER HELPERS ─────────────────────────────────────────────────────────
+
+function srcLabel(src){
+  if(!src)return null;
+  return (src.t==='W'?'Gan.':'Perd.')+' '+src.m;
+}
+
+function matchCard(id){
+  const m=S[id], def=DEFS[id]||{};
+  const cls='match-card '+(m.status==='active'?'active':m.status==='done'?'done':'pending');
+  const label=def.lbl||id;
+
+  function row(pid,isP1){
+    const src=def[isP1?'s1':'s2'];
+    const nm=pname(pid);
+    const isWin=m.status==='done'&&m.winner===pid;
+    const isLose=m.status==='done'&&m.loser===pid;
+    const tbdLabel=(!pid&&src)?srcLabel(src):null;
+    return `<div class="p-row${isWin?' row-win':''}${isLose?' row-lose':''}">
+      <span class="p-name${isWin?' w':''}${!nm?' tbd':''}">${nm||(tbdLabel||'· · ·')}</span>
+      ${isWin?'<span class="w-badge">W</span>':''}
+      ${m.status==='active'&&nm?`<button class="win-btn" data-match="${id}" data-pid="${pid}">Ganar</button>`:''}
+    </div>`;
+  }
+
+  return `<div class="${cls}">
+    <div class="m-id">${label}</div>
+    ${row(m.p1,true)}
+    ${row(m.p2,false)}
+  </div>`;
+}
+
+function col(label,ids){
+  return `<div class="round-col">
+    <div class="round-label">${label}</div>
+    <div class="matches-col">${ids.map(matchCard).join('')}</div>
+  </div>`;
+}
+
+function getPlacements(){
+  const pl={};
+  ['LB-1-0','LB-1-1'].forEach(id=>{if(S[id].loser)pl[S[id].loser]='7°-8°';});
+  ['LB-2-0','LB-2-1'].forEach(id=>{if(S[id].loser)pl[S[id].loser]='5°-6°';});
+  if(S['LB-3-0'].loser)pl[S['LB-3-0'].loser]='4°';
+  if(S['LB-4-0'].loser)pl[S['LB-4-0'].loser]='3°';
+  const gf1=S['GF-1'],gf2=S['GF-2'];
+  if(gf1.status==='done'&&!gf1.gf2needed){
+    pl[gf1.winner]='1°'; pl[gf1.loser]='2°';
+  } else if(gf2.status==='done'){
+    pl[gf2.winner]='1°'; pl[gf2.loser]='2°';
+  }
+  return pl;
+}
+
+function render(){
+  document.getElementById('wb-rounds').innerHTML=
+    col('Ronda 1',['WB-1-0','WB-1-1','WB-1-2','WB-1-3'])+
+    col('Semifinal',['WB-2-0','WB-2-1'])+
+    col('Final WB',['WB-3-0']);
+
+  document.getElementById('lb-rounds').innerHTML=
+    col('LB Ronda 1',['LB-1-0','LB-1-1'])+
+    col('LB Ronda 2',['LB-2-0','LB-2-1'])+
+    col('LB Semifinal',['LB-3-0'])+
+    col('Final LB',['LB-4-0']);
+
+  const gf1=S['GF-1'],gf2=S['GF-2'];
+  let gfHtml=matchCard('GF-1');
+  if(gf1.gf2needed||gf2.status==='active'||gf2.status==='done'){
+    gfHtml+=`<div class="gf2-tag">↓ Reset necesario (GF-2)</div>${matchCard('GF-2')}`;
+  } else if(gf1.status==='done'){
+    gfHtml+=`<div class="gf2-tag">Reset no necesario · WB gana directo</div>`;
+  } else {
+    gfHtml+=`<div class="gf2-tag">GF-2 solo si gana el lado LB</div>`;
+  }
+  document.getElementById('gf-content').innerHTML=gfHtml;
+
+  const pl=getPlacements();
+  const champ=PLAYERS.find(p=>pl[p.id]==='1°');
+  const el=document.getElementById('champ-name');
+  if(champ){el.className='champ-name';el.textContent=champ.name;}
+  else{el.className='champ-placeholder';el.textContent='Por definir';}
+
+  const p56=PLAYERS.filter(p=>pl[p.id]==='5°-6°');
+  const p78=PLAYERS.filter(p=>pl[p.id]==='7°-8°');
+  const items=[
+    {pos:'🥇 1°',top3:true, p:PLAYERS.find(p=>pl[p.id]==='1°')},
+    {pos:'🥈 2°',top3:true, p:PLAYERS.find(p=>pl[p.id]==='2°')},
+    {pos:'🥉 3°',top3:true, p:PLAYERS.find(p=>pl[p.id]==='3°')},
+    {pos:'4°',   top3:false,p:PLAYERS.find(p=>pl[p.id]==='4°')},
+    {pos:'5°-6°',top3:false,p:p56[0]||null},
+    {pos:'5°-6°',top3:false,p:p56[1]||null},
+    {pos:'7°-8°',top3:false,p:p78[0]||null},
+    {pos:'7°-8°',top3:false,p:p78[1]||null},
+  ];
+  document.getElementById('pl-grid').innerHTML=items.map(({pos,top3,p})=>`
+    <div class="pl-item">
+      <span class="pl-pos${top3?' top3':''}">${pos}</span>
+      <span class="pl-player${p?' filled':''}">${p?p.name:'—'}</span>
+    </div>`).join('');
+
+  // Show "3 players in LB" alert when WB Final is done but LB Final not yet done
+  const wb3done=S['WB-3-0'].status==='done';
+  const lb3notDone=S['LB-3-0'].status!=='done';
+  const lbFinalNotDone=S['LB-4-0'].status!=='done';
+  document.getElementById('three-alert').classList.toggle('visible',
+    wb3done&&lb3notDone&&lbFinalNotDone);
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────────────────
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.win-btn');
+  if(btn){pickWinner(btn.dataset.match,btn.dataset.pid);return;}
+  if(e.target.closest('#theme-toggle')){
+    const h=document.documentElement;
+    h.dataset.theme=h.dataset.theme==='seasons'?'lantern':'seasons';
+  }
+  if(e.target.closest('#reset-btn')||e.target.closest('#reset-btn2')){
+    initState();render();
+  }
+});
+
+initState();
+render();
+</script>
+</body>
+</html>
