@@ -201,7 +201,7 @@ export default function Setup() {
         />
         {t.registrationCode && (
           <div style={{ fontSize: 12, color: 'var(--faint)', fontFamily: 'monospace', marginBottom: 12 }}>
-            https://shunka.vercel.app/registro/{t.registrationCode}
+            {window.location.origin}/registro/{t.registrationCode}
           </div>
         )}
 
