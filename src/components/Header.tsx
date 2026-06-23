@@ -16,7 +16,7 @@ const NAV_TABS: { id: Screen; label: string }[] = [
 ];
 
 export default function Header({ screen, onNav, theme, onToggleTheme }: Props) {
-  const themeLabel = theme === 'lantern' ? 'Farol' : '4 Estaciones';
+  const themeLabel = theme === 'dotonbori' ? 'Dotonbori' : '4 Estaciones';
 
   return (
     <header style={{

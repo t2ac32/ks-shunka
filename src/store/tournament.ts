@@ -15,7 +15,7 @@ function blankT(): Tournament {
   return {
     id: 't_' + Date.now().toString(36),
     name: 'Shunka Shūtō no Kessen',
-    theme: 'lantern',
+    theme: 'dotonbori',
     seedMode: 'random',
     status: 'setup',
     players: [],
@@ -41,6 +41,7 @@ function loadSaved(): Tournament {
       ...saved,
       timer: saved.timer ?? blank.timer,
       stream: saved.stream ?? blank.stream,
+      theme: (saved.theme === 'lantern' as string ? 'dotonbori' : saved.theme) ?? blank.theme,
     };
   } catch {
     return blankT();
@@ -66,7 +67,7 @@ type TournamentStore = {
   recordGame(matchId: string, d1: number, d2: number, winnerSide: 'p1' | 'p2'): void;
   undoGame(matchId: string, gameIdx: number): void;
   exportJSON(): void;
-  loadFromJSON(data: Tournament): void;
+  loadFromJSON(data: Partial<Tournament>): void;
   loadRegistrations(code: string): Promise<{ count: number; loaded: number }>;
   setTimerDuration(seconds: number): void;
   startTimer(): void;
@@ -221,8 +222,16 @@ export const useTournamentStore = create<TournamentStore>()(
     },
 
     loadFromJSON(data) {
-      set({ t: data });
-      persist(data);
+      const blank = blankT();
+      const migrated: Tournament = {
+        ...blank,
+        ...data,
+        timer: data.timer ?? blank.timer,
+        stream: data.stream ?? blank.stream,
+        theme: (data.theme === 'lantern' as string ? 'dotonbori' : data.theme) ?? blank.theme,
+      };
+      set({ t: migrated });
+      persist(migrated);
     },
 
     async loadRegistrations(code) {

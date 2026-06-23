@@ -1,4 +1,4 @@
-export type Theme = 'lantern' | 'seasons';
+export type Theme = 'dotonbori' | 'seasons';
 
 export type DeckRef =
   | { id: string }

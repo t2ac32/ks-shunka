@@ -80,7 +80,7 @@ export default function Register() {
   const showSuccess = submitted && !editing;
 
   return (
-    <div data-theme="lantern" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+    <div data-theme="dotonbori" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <div style={{ maxWidth: 560, margin: '0 auto', padding: '32px 16px' }}>
 
         {/* Header */}

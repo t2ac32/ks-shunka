@@ -31,7 +31,7 @@ export default function MainApp() {
         screen={screen}
         onNav={setScreen}
         theme={theme}
-        onToggleTheme={() => setTheme(theme === 'lantern' ? 'seasons' : 'lantern')}
+        onToggleTheme={() => setTheme(theme === 'dotonbori' ? 'seasons' : 'dotonbori')}
       />
       {screen === 'setup' && <Setup />}
       {screen === 'judge' && <Judge />}
