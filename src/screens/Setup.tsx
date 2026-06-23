@@ -5,7 +5,7 @@ import { ARCHETYPES } from '../data/archetypes';
 import { supabase } from '../lib/supabase';
 import type { DeckRef, Player, Tournament } from '../types';
 
-const MOCK_NAMES = ['Aoi', 'Hana', 'Kaito', 'Ren', 'Sora', 'Yuki', 'Mika', 'Taro', 'Nana', 'Riku', 'Saki', 'Jin'];
+const MOCK_NAMES = ['Aoi', 'Hana', 'Kaito', 'Ren', 'Sora', 'Yuki', 'Mika', 'Taro'];
 
 function generateMock(loadFromJSON: (data: Tournament) => void) {
   const current = useTournamentStore.getState().t;
