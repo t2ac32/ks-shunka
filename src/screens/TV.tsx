@@ -73,14 +73,14 @@ function BracketSection({
           <div key={rIdx} style={{ display: 'flex', flexDirection: 'column' }}>
             <div
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 color: 'var(--dim)',
                 fontWeight: 700,
                 textAlign: 'center',
                 marginBottom: 8,
-                height: 16,
+                height: 20,
               }}
             >
               {getRoundLabel(rIdx, rounds.length)}

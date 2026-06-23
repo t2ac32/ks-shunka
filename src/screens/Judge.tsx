@@ -130,7 +130,7 @@ function MatchList({ matches, players, onSelect, champId }: MatchListProps) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0 14px' }}>
         <span style={{ width: 7, height: 18, background: 'var(--accent)', borderRadius: 2 }} />
-        <h2 style={{ margin: 0, fontFamily: 'var(--serif)', fontSize: 17, fontWeight: 700 }}>
+        <h2 style={{ margin: 0, fontFamily: 'var(--serif)', fontSize: 17, fontWeight: 700, color: 'var(--ink)' }}>
           Partidas por jugar
         </h2>
         <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--faint)' }}>
@@ -168,6 +168,7 @@ function MatchList({ matches, players, onSelect, champId }: MatchListProps) {
               padding: '13px 14px',
               marginBottom: 10,
               cursor: 'pointer',
+              color: 'var(--ink)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
@@ -806,15 +807,9 @@ export default function Judge() {
     { label: '75 min', seconds: 4500 },
   ];
 
-  const containerStyle: React.CSSProperties = {
-    maxWidth: 560,
-    margin: '0 auto',
-    padding: 'clamp(14px,3vw,22px) clamp(12px,3vw,18px) 100px',
-  };
-
   if (t.status !== 'running') {
     return (
-      <main style={containerStyle}>
+      <main style={{ maxWidth: 560, margin: '0 auto', padding: 'clamp(14px,3vw,22px) clamp(12px,3vw,18px) 100px' }}>
         <NotStarted />
       </main>
     );
@@ -823,124 +818,154 @@ export default function Judge() {
   const bk = t.bk!;
   const champId = champion(bk);
 
+  const liveNow = sortMatches(Object.values(bk.matches).filter(m =>
+    (m.status === 'banning' || m.status === 'playing') &&
+    m.p1 && m.p1 !== 'BYE' && m.p2 && m.p2 !== 'BYE' &&
+    (m.id !== 'GF-2' || m.needed)
+  ));
+  const currentRoundLabel = liveNow.length > 0 ? roundLabelFull(liveNow[0]) : null;
+
+  const outerStyle: React.CSSProperties = {
+    maxWidth: 980,
+    margin: '0 auto',
+    padding: 'clamp(14px,3vw,22px) clamp(12px,3vw,18px) 100px',
+    display: 'flex',
+    gap: 24,
+    alignItems: 'flex-start',
+  };
+
+  const timerPanel = (
+    <div style={{
+      width: 260,
+      flexShrink: 0,
+      position: 'sticky',
+      top: 20,
+      background: 'var(--panel)',
+      borderRadius: 16,
+      padding: '20px 18px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+    }}>
+      {currentRoundLabel ? (
+        <div style={{
+          fontSize: 10,
+          letterSpacing: '.14em',
+          textTransform: 'uppercase',
+          color: 'var(--accent2)',
+          textAlign: 'center',
+          fontWeight: 700,
+        }}>
+          {currentRoundLabel}
+        </div>
+      ) : (
+        <div style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--faint)', textAlign: 'center' }}>
+          ⏱ Timer de Ronda
+        </div>
+      )}
+
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          fontFamily: 'var(--serif)',
+          fontSize: 68,
+          fontWeight: 800,
+          color: remaining <= 120 ? 'var(--accent)' : 'var(--accent2)',
+          letterSpacing: '.05em',
+          lineHeight: 1,
+        }}>
+          {formatTimer(remaining)}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 6, letterSpacing: '.06em' }}>
+          {timer.running ? 'En curso' : 'Ronda no iniciada'}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
+        {PRESETS.map(({ label, seconds }) => (
+          <button
+            key={seconds}
+            onClick={() => setTimerDuration(seconds)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: 8,
+              border: `1px solid ${timer.duration === seconds ? 'color-mix(in srgb,var(--accent2) 50%,transparent)' : 'var(--line2)'}`,
+              background: 'var(--panel2)',
+              color: timer.duration === seconds ? 'var(--accent2)' : 'var(--dim)',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => timer.running ? stopTimer() : startTimer()}
+          style={{
+            flex: 1,
+            padding: '12px 6px',
+            borderRadius: 12,
+            border: 'none',
+            background: 'var(--accent)',
+            color: '#fff',
+            fontSize: 13,
+            fontWeight: 900,
+            letterSpacing: '.08em',
+            cursor: 'pointer',
+          }}
+        >
+          {timer.running ? '⏹ DETENER' : '▶ INICIAR'}
+        </button>
+        <button
+          onClick={resetTimer}
+          style={{
+            padding: '12px 14px',
+            borderRadius: 12,
+            border: '1px solid var(--line2)',
+            background: 'var(--panel2)',
+            color: 'var(--faint)',
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          ↺
+        </button>
+      </div>
+    </div>
+  );
+
   if (selMatchId !== null) {
     return (
-      <main style={containerStyle}>
-        <MatchDetail
-          matchId={selMatchId}
-          matches={bk.matches}
-          players={t.players}
-          onBack={() => setSelMatchId(null)}
-          store={store}
-        />
+      <main style={outerStyle}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <MatchDetail
+            matchId={selMatchId}
+            matches={bk.matches}
+            players={t.players}
+            onBack={() => setSelMatchId(null)}
+            store={store}
+          />
+        </div>
+        {timerPanel}
       </main>
     );
   }
 
   return (
-    <main style={containerStyle}>
-      {/* Timer section — always visible */}
-      <div style={{
-        background: 'var(--panel)',
-        borderRadius: 16,
-        padding: '18px 20px',
-        marginBottom: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 14,
-      }}>
-        <div style={{
-          fontFamily: 'var(--serif)',
-          fontSize: 14,
-          fontWeight: 700,
-          color: 'var(--accent2)',
-          letterSpacing: '.06em',
-        }}>
-          ⏱ Timer de Ronda
-        </div>
-
-        {/* Countdown display */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: 'var(--serif)',
-            fontSize: 48,
-            fontWeight: 800,
-            color: remaining <= 120 ? 'var(--accent)' : 'var(--accent2)',
-            letterSpacing: '.05em',
-            lineHeight: 1,
-          }}>
-            {formatTimer(remaining)}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 6, letterSpacing: '.06em' }}>
-            {timer.running ? 'En curso' : 'Ronda no iniciada'}
-          </div>
-        </div>
-
-        {/* Presets */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {PRESETS.map(({ label, seconds }) => (
-            <button
-              key={seconds}
-              onClick={() => setTimerDuration(seconds)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: `1px solid ${timer.duration === seconds ? 'color-mix(in srgb,var(--accent2) 50%,transparent)' : 'var(--line2)'}`,
-                background: 'var(--panel2)',
-                color: timer.duration === seconds ? 'var(--accent2)' : 'var(--dim)',
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Start / Stop + Reset */}
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => timer.running ? stopTimer() : startTimer()}
-            style={{
-              flex: 1,
-              padding: 14,
-              borderRadius: 12,
-              border: 'none',
-              background: 'var(--accent)',
-              color: '#fff',
-              fontSize: 15,
-              fontWeight: 900,
-              letterSpacing: '.1em',
-              cursor: 'pointer',
-            }}
-          >
-            {timer.running ? '⏹ DETENER' : '▶ INICIAR RONDA'}
-          </button>
-          <button
-            onClick={resetTimer}
-            style={{
-              padding: '14px 18px',
-              borderRadius: 12,
-              border: '1px solid var(--line2)',
-              background: 'var(--panel2)',
-              color: 'var(--faint)',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            ↺
-          </button>
-        </div>
+    <main style={outerStyle}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <MatchList
+          matches={bk.matches}
+          players={t.players}
+          onSelect={setSelMatchId}
+          champId={champId}
+        />
       </div>
-
-      <MatchList
-        matches={bk.matches}
-        players={t.players}
-        onSelect={setSelMatchId}
-        champId={champId}
-      />
+      {timerPanel}
     </main>
   );
 }
