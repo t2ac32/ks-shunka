@@ -119,11 +119,71 @@ export default function TV() {
   const timer = useTournamentStore(s => s.t.timer);
   const stream = useTournamentStore(s => s.t.stream);
   const setLiveActive = useTournamentStore(s => s.setLiveActive);
-  const reorderPlayers = useTournamentStore(s => s.reorderPlayers);
+  const setPlayerOrder = useTournamentStore(s => s.setPlayerOrder);
   const startTournament = useTournamentStore(s => s.startTournament);
   const [remaining, setRemaining] = useState(() => timerRemaining(timer));
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [dragOver, setDragOver] = useState<number | null>(null);
+  const [draftSeeds, setDraftSeeds] = useState<(string | null)[]>(() => {
+    const seeds: (string | null)[] = Array(8).fill(null);
+    t.players.forEach((p, i) => { if (i < 8) seeds[i] = p.id; });
+    return seeds;
+  });
+  const [dragPlayerId, setDragPlayerId] = useState<string | null>(null);
+  const [dragFromSlot, setDragFromSlot] = useState<number | null>(null);
+  const [lockedSlot, setLockedSlot] = useState<number | null>(null);
+
+  // Bracket layout constants (pixels)
+  const SH = 52, SG = 8, MH = 2 * SH + SG, MG = 32;
+  const TH = 2 * MH + MG;
+  const EW = 22, AW = 44;
+  const M1M = SH + SG / 2;
+  const M2M = MH + MG + SH + SG / 2;
+  const CM = Math.round((M1M + M2M) / 2);
+
+  function playSwordSound() {
+    try {
+      const ctx = new AudioContext();
+      const sr = ctx.sampleRate;
+      const dur = 0.55;
+      const buf = ctx.createBuffer(1, Math.floor(sr * dur), sr);
+      const ch = buf.getChannelData(0);
+      for (let i = 0; i < ch.length; i++) {
+        const s = i / sr;
+        const scrape = (Math.random() * 2 - 1) * Math.exp(-s * 18) * 0.45;
+        const sweep = Math.sin(2 * Math.PI * (3800 - 3400 * (s / dur)) * s) * Math.exp(-s * 7) * 0.2;
+        const ring = Math.sin(2 * Math.PI * 820 * s) * Math.exp(-Math.max(0, s - 0.14) * 20) * (s > 0.12 ? 0.32 : 0);
+        ch[i] = scrape + sweep + ring;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const g = ctx.createGain();
+      g.gain.value = 0.55;
+      src.connect(g);
+      g.connect(ctx.destination);
+      src.start();
+      src.onended = () => { try { ctx.close(); } catch { /* ignore */ } };
+    } catch { /* audio not available */ }
+  }
+
+  function handleSlotDrop(slotIdx: number) {
+    if (dragPlayerId === null) return;
+    const next = [...draftSeeds];
+    const existingSlot = next.findIndex(id => id === dragPlayerId);
+    const occupant = next[slotIdx];
+    if (existingSlot !== -1) next[existingSlot] = occupant ?? null;
+    next[slotIdx] = dragPlayerId;
+    setDraftSeeds(next);
+    setLockedSlot(slotIdx);
+    playSwordSound();
+    setDragPlayerId(null);
+    setDragFromSlot(null);
+    setTimeout(() => setLockedSlot(null), 700);
+  }
+
+  function handleDraftStart() {
+    const orderedIds = draftSeeds.filter((id): id is string => id !== null);
+    setPlayerOrder(orderedIds);
+    startTournament();
+  }
 
   useEffect(() => {
     setRemaining(timerRemaining(timer));
@@ -167,106 +227,192 @@ export default function TV() {
         overflow: 'hidden',
       }}
     >
-      {/* Draft overlay — shown before tournament starts when players exist */}
-      {t.status === 'setup' && t.players.length >= 2 && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'var(--bg)',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 28,
-          padding: 40,
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontFamily: 'var(--serif)',
-              fontSize: 22,
-              fontWeight: 800,
-              background: 'linear-gradient(90deg,#b8860b,#ffd700,#ffe87c,#ffd700,#b8860b)',
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              animation: 'shimmer 3s linear infinite',
-              marginBottom: 8,
-            }}>
-              春夏秋冬 · {t.name}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--faint)', letterSpacing: '.1em', textTransform: 'uppercase' }}>
-              Selección de posición en el bracket · Arrastra para reordenar
-            </div>
-          </div>
+      {/* Draft overlay — bracket seeding before tournament starts */}
+      {t.status === 'setup' && t.players.length >= 2 && (() => {
+        const pById = new Map(t.players.map(p => [p.id, p]));
+        const allPlaced = t.players.length >= 4 && t.players.every(p => draftSeeds.includes(p.id));
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 14,
-            width: '100%',
-            maxWidth: 720,
-          }}>
-            {t.players.map((p, i) => (
-              <div
-                key={p.id}
-                draggable
-                onDragStart={() => setDragIdx(i)}
-                onDragOver={e => { e.preventDefault(); setDragOver(i); }}
-                onDrop={() => {
-                  if (dragIdx !== null && dragIdx !== i) reorderPlayers(dragIdx, i);
-                  setDragIdx(null);
-                  setDragOver(null);
-                }}
-                onDragEnd={() => { setDragIdx(null); setDragOver(null); }}
-                style={{
-                  background: 'var(--panel)',
-                  border: `1px solid ${dragOver === i ? 'var(--accent2)' : 'var(--line2)'}`,
-                  borderRadius: 14,
-                  padding: '16px 12px',
-                  textAlign: 'center',
-                  cursor: 'grab',
-                  opacity: dragIdx === i ? 0.4 : 1,
-                  boxShadow: dragOver === i ? '0 0 14px color-mix(in srgb,var(--accent2) 40%,transparent)' : 'none',
-                  animation: `draft-float ${2.5 + (i % 4) * 0.4}s ease-in-out infinite`,
-                  transition: 'border-color .15s, box-shadow .15s',
-                }}
-              >
-                <div style={{ fontSize: 10, color: 'var(--faint)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
-                  Seed {i + 1}
-                </div>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: 16, fontWeight: 800, color: 'var(--ink)' }}>
-                  {p.name}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ fontSize: 11, color: 'var(--faint)', letterSpacing: '.06em' }}>
-            Se bloquea al iniciar la primera ronda
-          </div>
-
-          {t.players.length >= 4 && (
-            <button
-              onClick={startTournament}
+        const slotEl = (idx: number) => {
+          const pid = draftSeeds[idx];
+          const p = pid ? pById.get(pid) : undefined;
+          const isLocked = lockedSlot === idx;
+          const isDragging = pid !== null && pid === dragPlayerId;
+          return (
+            <div
+              key={idx}
+              onDragOver={e => e.preventDefault()}
+              onDrop={() => handleSlotDrop(idx)}
+              draggable={!!p}
+              onDragStart={() => { if (p) { setDragPlayerId(p.id); setDragFromSlot(idx); } }}
+              onDragEnd={() => { setDragPlayerId(null); setDragFromSlot(null); }}
               style={{
-                padding: '14px 36px',
-                borderRadius: 12,
-                border: 'none',
-                background: 'var(--accent)',
-                color: '#fff',
-                fontSize: 15,
-                fontWeight: 900,
-                letterSpacing: '.1em',
-                cursor: 'pointer',
-                boxShadow: '0 0 20px color-mix(in srgb,var(--accent) 50%,transparent)',
+                width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
+                border: p
+                  ? `1px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--faint)' : 'var(--line2)'}`
+                  : '1px dashed color-mix(in srgb,var(--line2) 45%,transparent)',
+                background: p ? 'var(--panel)' : 'color-mix(in srgb,var(--bg2) 60%,transparent)',
+                display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px',
+                cursor: p ? 'grab' : 'default',
+                opacity: isDragging ? 0.3 : 1,
+                animation: isLocked ? 'slot-lock 0.65s ease' : 'none',
+                transition: 'border-color .2s, opacity .15s',
+                userSelect: 'none',
               }}
             >
-              INICIAR TORNEO →
-            </button>
-          )}
-        </div>
-      )}
+              <span style={{ fontSize: 10, color: 'var(--faint)', fontWeight: 700, letterSpacing: '.06em', flexShrink: 0, minWidth: 18 }}>
+                #{idx + 1}
+              </span>
+              {p
+                ? <span style={{ fontFamily: 'var(--serif)', fontSize: 14, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                : <span style={{ fontSize: 11, color: 'color-mix(in srgb,var(--faint) 55%,transparent)', fontStyle: 'italic' }}>arrastra aquí</span>
+              }
+            </div>
+          );
+        };
+
+        const elbow = (side: 'left' | 'right') => (
+          <div style={{ width: EW, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            <div style={{ flex: 1, ...(side === 'left'
+              ? { borderRight: '2px solid var(--line2)', borderBottom: '2px solid var(--line2)', borderBottomRightRadius: 6 }
+              : { borderLeft: '2px solid var(--line2)', borderBottom: '2px solid var(--line2)', borderBottomLeftRadius: 6 }) }} />
+            <div style={{ flex: 1, ...(side === 'left'
+              ? { borderRight: '2px solid var(--line2)', borderTop: '2px solid var(--line2)', borderTopRightRadius: 6 }
+              : { borderLeft: '2px solid var(--line2)', borderTop: '2px solid var(--line2)', borderTopLeftRadius: 6 }) }} />
+          </div>
+        );
+
+        const matchL = (i1: number, i2: number) => (
+          <div style={{ display: 'flex', alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: SG }}>{slotEl(i1)}{slotEl(i2)}</div>
+            {elbow('left')}
+          </div>
+        );
+        const matchR = (i1: number, i2: number) => (
+          <div style={{ display: 'flex', alignItems: 'stretch' }}>
+            {elbow('right')}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: SG }}>{slotEl(i1)}{slotEl(i2)}</div>
+          </div>
+        );
+
+        return (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'var(--bg)', zIndex: 10,
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: 24, padding: '20px 40px', overflowY: 'auto',
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 800,
+                background: 'linear-gradient(90deg,#b8860b,#ffd700,#ffe87c,#ffd700,#b8860b)',
+                backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                animation: 'shimmer 3s linear infinite', marginBottom: 6,
+              }}>
+                春夏秋冬 · {t.name}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--faint)', letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                Arrastra tu nombre al lugar del bracket · Suelta para fijar
+              </div>
+            </div>
+
+            {/* Floating player cards */}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 780 }}>
+              {t.players.map((p, i) => {
+                const placed = draftSeeds.includes(p.id);
+                return (
+                  <div
+                    key={p.id}
+                    draggable
+                    onDragStart={() => { setDragPlayerId(p.id); setDragFromSlot(null); }}
+                    onDragEnd={() => { setDragPlayerId(null); setDragFromSlot(null); }}
+                    style={{
+                      padding: '9px 16px', borderRadius: 12,
+                      border: '1px solid var(--line2)',
+                      background: placed ? 'color-mix(in srgb,var(--panel) 35%,transparent)' : 'var(--panel)',
+                      cursor: 'grab',
+                      animation: `draft-float ${2.4 + i * 0.3}s ease-in-out infinite`,
+                      fontFamily: 'var(--serif)', fontSize: 14,
+                      fontWeight: placed ? 400 : 700,
+                      color: placed ? 'var(--faint)' : 'var(--ink)',
+                      userSelect: 'none', opacity: dragPlayerId === p.id ? 0.35 : 1,
+                      transition: 'all .2s',
+                    }}
+                  >
+                    {p.name}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bracket */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0, overflow: 'visible' }}>
+              {/* Left bracket column */}
+              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: MG }}>
+                {matchL(0, 7)}
+                {matchL(3, 4)}
+                {/* Vertical connector between match elbows */}
+                <div style={{ position: 'absolute', right: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                {/* Arm going right toward center */}
+                <div style={{ position: 'absolute', right: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+              </div>
+
+              {/* Center column — trophy + horizontal connecting line */}
+              <div style={{ width: 110, height: TH, position: 'relative', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: CM - 1, left: 0, right: 0, height: 2, background: 'var(--line2)' }} />
+                <div style={{
+                  position: 'absolute', top: CM, left: '50%',
+                  transform: 'translate(-50%, -50%)', zIndex: 1,
+                  textAlign: 'center', padding: '8px 12px',
+                  background: 'var(--bg)',
+                  border: '1px solid color-mix(in srgb,var(--accent2) 40%,var(--line2))',
+                  borderRadius: 12,
+                }}>
+                  <div style={{ fontSize: 26 }}>🏆</div>
+                  <div style={{ fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)', marginTop: 3 }}>
+                    Final
+                  </div>
+                </div>
+              </div>
+
+              {/* Right bracket column */}
+              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: MG }}>
+                {matchR(1, 6)}
+                {matchR(2, 5)}
+                {/* Vertical connector between match elbows */}
+                <div style={{ position: 'absolute', left: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                {/* Arm going left toward center */}
+                <div style={{ position: 'absolute', left: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              {allPlaced && (
+                <button
+                  onClick={handleDraftStart}
+                  style={{
+                    padding: '13px 36px', borderRadius: 12, border: 'none',
+                    background: 'var(--accent)', color: '#fff',
+                    fontSize: 15, fontWeight: 900, letterSpacing: '.1em', cursor: 'pointer',
+                    boxShadow: '0 0 22px color-mix(in srgb,var(--accent) 50%,transparent)',
+                    animation: 'glow-pulse 2s ease-in-out infinite',
+                  }}
+                >
+                  INICIAR TORNEO →
+                </button>
+              )}
+              {!allPlaced && t.players.length >= 4 && (
+                <div style={{ fontSize: 11, color: 'var(--faint)', letterSpacing: '.06em' }}>
+                  Coloca a todos los jugadores para iniciar
+                </div>
+              )}
+              <div style={{ fontSize: 10, color: 'color-mix(in srgb,var(--faint) 60%,transparent)', letterSpacing: '.06em' }}>
+                Se bloquea al iniciar la primera ronda
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {t.status !== 'running' || !bk ? (
         <div

@@ -77,6 +77,7 @@ type TournamentStore = {
   setInstagramUrl(url: string): void;
   setYoutubeUrl(url: string): void;
   reorderPlayers(fromIdx: number, toIdx: number): void;
+  setPlayerOrder(ids: string[]): void;
 };
 
 export const useTournamentStore = create<TournamentStore>()(
@@ -311,6 +312,17 @@ export const useTournamentStore = create<TournamentStore>()(
         const [moved] = players.splice(fromIdx, 1);
         players.splice(toIdx, 0, moved);
         s.t.players = players;
+      });
+      persist(get().t);
+    },
+
+    setPlayerOrder(ids: string[]) {
+      set(s => {
+        const map = new Map(s.t.players.map(p => [p.id, p]));
+        const ordered = ids.filter(id => map.has(id)).map(id => map.get(id)!);
+        const idSet = new Set(ids);
+        const rest = s.t.players.filter(p => !idSet.has(p.id));
+        s.t.players = [...ordered, ...rest];
       });
       persist(get().t);
     },
