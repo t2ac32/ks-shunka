@@ -128,7 +128,6 @@ export default function TV() {
     return seeds;
   });
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null);
-  const [dragFromSlot, setDragFromSlot] = useState<number | null>(null);
   const [lockedSlot, setLockedSlot] = useState<number | null>(null);
 
   // Bracket layout constants (pixels)
@@ -175,7 +174,6 @@ export default function TV() {
     setLockedSlot(slotIdx);
     playSwordSound();
     setDragPlayerId(null);
-    setDragFromSlot(null);
     setTimeout(() => setLockedSlot(null), 700);
   }
 
@@ -243,8 +241,8 @@ export default function TV() {
               onDragOver={e => e.preventDefault()}
               onDrop={() => handleSlotDrop(idx)}
               draggable={!!p}
-              onDragStart={() => { if (p) { setDragPlayerId(p.id); setDragFromSlot(idx); } }}
-              onDragEnd={() => { setDragPlayerId(null); setDragFromSlot(null); }}
+              onDragStart={() => { if (p) setDragPlayerId(p.id); }}
+              onDragEnd={() => setDragPlayerId(null)}
               style={{
                 width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
                 border: p
