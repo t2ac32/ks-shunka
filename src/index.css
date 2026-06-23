@@ -12,22 +12,52 @@ a { color: inherit; text-decoration: none; }
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Theme: Farol (lantern) — default */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 8px #ff220066, 0 0 24px #ff220033; }
+  50%     { box-shadow: 0 0 16px #ff2200aa, 0 0 40px #ff220055; }
+}
+
+@keyframes gold-glow {
+  0%,100% { text-shadow: 0 0 10px #ffd70088; }
+  50%     { text-shadow: 0 0 20px #ffd700cc, 0 0 40px #ffd70066; }
+}
+
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: .5; transform: scale(.75); }
+}
+
+@keyframes draft-float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-5px); }
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Theme: Dotonbori — default */
 :root {
-  --bg:        #14110f;
-  --bg2:       #1b1714;
-  --panel:     #201b17;
-  --panel2:    #28211b;
-  --line:      #3a2f27;
-  --line2:     #4a3c31;
-  --ink:       #f3ece2;
-  --dim:       #b3a596;
-  --faint:     #7d7065;
-  --accent:    #e0562d;
-  --accent2:   #f0a92b;
-  --accentInk: #1a0f08;
-  --good:      #56b083;
-  --bad:       #d8584f;
+  --bg:        #0d0500;
+  --bg2:       #180a02;
+  --panel:     #1f0e04;
+  --panel2:    #2a1208;
+  --line:      #4a1e08;
+  --line2:     #6b2c0e;
+  --ink:       #ffefd5;
+  --dim:       #c4916a;
+  --faint:     #7a4e32;
+  --accent:    #ff2200;
+  --accent2:   #ffd700;
+  --accentInk: #0d0500;
+  --good:      #39ff14;
+  --bad:       #ff2d55;
   --serif:     'Shippori Mincho', serif;
 }
 
