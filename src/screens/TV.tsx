@@ -223,27 +223,37 @@ export default function TV() {
               style={{
                 width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
                 border: p
-                  ? `1px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--dim)' : 'var(--dim)'}`
-                  : '1px dashed var(--dim)',
-                background: p ? 'var(--panel)' : 'color-mix(in srgb,var(--panel) 30%,transparent)',
+                  ? `2px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--accent2)' : 'color-mix(in srgb,var(--accent2) 75%,var(--dim))'}`
+                  : '2px dashed color-mix(in srgb,var(--accent2) 55%,var(--dim))',
+                background: p
+                  ? 'linear-gradient(135deg,color-mix(in srgb,var(--accent2) 10%,var(--panel)),var(--panel))'
+                  : 'color-mix(in srgb,var(--panel) 75%,transparent)',
+                boxShadow: p
+                  ? '0 0 14px color-mix(in srgb,var(--accent2) 30%,transparent)'
+                  : undefined,
                 display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px',
                 cursor: p ? 'grab' : 'default',
                 opacity: isDragging ? 0.3 : 1,
-                animation: isLocked ? 'slot-lock 0.65s ease' : 'none',
+                animation: isLocked
+                  ? 'slot-lock 0.65s ease'
+                  : p
+                    ? 'none'
+                    : 'slot-breath 2.6s ease-in-out infinite',
                 transition: 'border-color .2s, opacity .15s',
                 userSelect: 'none',
               }}
             >
               <span style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: '.06em', flexShrink: 0, minWidth: 18,
-                color: p ? 'var(--accent2)' : 'var(--dim)',
+                fontSize: 13, fontWeight: 900, letterSpacing: '.06em', flexShrink: 0, minWidth: 18,
+                color: 'var(--accent2)',
                 animation: p ? 'none' : 'gold-glow 2.5s ease-in-out infinite',
+                textShadow: p ? '0 0 8px color-mix(in srgb,var(--accent2) 45%,transparent)' : undefined,
               }}>
                 #{idx + 1}
               </span>
               {p
-                ? <span style={{ fontFamily: 'var(--serif)', fontSize: 14, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                : <span style={{ fontSize: 12, color: 'var(--dim)', letterSpacing: '.04em' }}>arrastra aquí</span>
+                ? <span style={{ fontFamily: 'var(--serif)', fontSize: 15, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(0,0,0,.5)' }}>{p.name}</span>
+                : <span style={{ fontSize: 13, fontWeight: 700, color: 'color-mix(in srgb,var(--ink) 75%,var(--dim))', letterSpacing: '.06em' }}>arrastra aquí</span>
               }
             </div>
           );
@@ -252,11 +262,11 @@ export default function TV() {
         const elbow = (side: 'left' | 'right') => (
           <div style={{ width: EW, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ flex: 1, ...(side === 'left'
-              ? { borderRight: '2px solid var(--line2)', borderBottom: '2px solid var(--line2)', borderBottomRightRadius: 6 }
-              : { borderLeft: '2px solid var(--line2)', borderBottom: '2px solid var(--line2)', borderBottomLeftRadius: 6 }) }} />
+              ? { borderRight: '2px solid var(--dim)', borderBottom: '2px solid var(--dim)', borderBottomRightRadius: 6 }
+              : { borderLeft: '2px solid var(--dim)', borderBottom: '2px solid var(--dim)', borderBottomLeftRadius: 6 }) }} />
             <div style={{ flex: 1, ...(side === 'left'
-              ? { borderRight: '2px solid var(--line2)', borderTop: '2px solid var(--line2)', borderTopRightRadius: 6 }
-              : { borderLeft: '2px solid var(--line2)', borderTop: '2px solid var(--line2)', borderTopLeftRadius: 6 }) }} />
+              ? { borderRight: '2px solid var(--dim)', borderTop: '2px solid var(--dim)', borderTopRightRadius: 6 }
+              : { borderLeft: '2px solid var(--dim)', borderTop: '2px solid var(--dim)', borderTopLeftRadius: 6 }) }} />
           </div>
         );
 
@@ -330,24 +340,25 @@ export default function TV() {
                 {matchL(0, 7)}
                 {matchL(3, 4)}
                 {/* Vertical connector between match elbows */}
-                <div style={{ position: 'absolute', right: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', right: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--dim)', pointerEvents: 'none'}} />
                 {/* Arm going right toward center */}
-                <div style={{ position: 'absolute', right: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', right: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--dim)', pointerEvents: 'none'}} />
               </div>
 
               {/* Center column — trophy + horizontal connecting line */}
               <div style={{ width: 110, height: TH, position: 'relative', flexShrink: 0 }}>
-                <div style={{ position: 'absolute', top: CM - 1, left: 0, right: 0, height: 2, background: 'var(--line2)' }} />
+                <div style={{ position: 'absolute', top: CM - 1, left: 0, right: 0, height: 2, background: 'var(--dim)' }} />
                 <div style={{
                   position: 'absolute', top: CM, left: '50%',
                   transform: 'translate(-50%, -50%)', zIndex: 1,
-                  textAlign: 'center', padding: '8px 12px',
+                  textAlign: 'center', padding: '10px 14px',
                   background: 'var(--bg)',
-                  border: '1px solid color-mix(in srgb,var(--accent2) 40%,var(--line2))',
+                  border: '2px solid color-mix(in srgb,var(--accent2) 75%,var(--dim))',
                   borderRadius: 12,
+                  boxShadow: '0 0 18px color-mix(in srgb,var(--accent2) 35%,transparent)',
                 }}>
-                  <div style={{ fontSize: 26 }}>🏆</div>
-                  <div style={{ fontSize: 9, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)', marginTop: 3 }}>
+                  <div style={{ fontSize: 28 }}>🏆</div>
+                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--accent2)', marginTop: 3 }}>
                     Final
                   </div>
                 </div>
@@ -358,9 +369,9 @@ export default function TV() {
                 {matchR(1, 6)}
                 {matchR(2, 5)}
                 {/* Vertical connector between match elbows */}
-                <div style={{ position: 'absolute', left: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', left: 0, top: M1M, height: M2M - M1M, width: 2, background: 'var(--dim)', pointerEvents: 'none'}} />
                 {/* Arm going left toward center */}
-                <div style={{ position: 'absolute', left: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--line2)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', left: -AW, top: CM - 1, width: AW, height: 2, background: 'var(--dim)', pointerEvents: 'none'}} />
               </div>
             </div>
 
