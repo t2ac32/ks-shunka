@@ -122,11 +122,7 @@ export default function TV() {
   const setPlayerOrder = useTournamentStore(s => s.setPlayerOrder);
   const startTournament = useTournamentStore(s => s.startTournament);
   const [remaining, setRemaining] = useState(() => timerRemaining(timer));
-  const [draftSeeds, setDraftSeeds] = useState<(string | null)[]>(() => {
-    const seeds: (string | null)[] = Array(8).fill(null);
-    t.players.forEach((p, i) => { if (i < 8) seeds[i] = p.id; });
-    return seeds;
-  });
+  const [draftSeeds, setDraftSeeds] = useState<(string | null)[]>(() => Array(8).fill(null));
   const [dragPlayerId, setDragPlayerId] = useState<string | null>(null);
   const [lockedSlot, setLockedSlot] = useState<number | null>(null);
 
@@ -140,26 +136,7 @@ export default function TV() {
 
   function playSwordSound() {
     try {
-      const ctx = new AudioContext();
-      const sr = ctx.sampleRate;
-      const dur = 0.55;
-      const buf = ctx.createBuffer(1, Math.floor(sr * dur), sr);
-      const ch = buf.getChannelData(0);
-      for (let i = 0; i < ch.length; i++) {
-        const s = i / sr;
-        const scrape = (Math.random() * 2 - 1) * Math.exp(-s * 18) * 0.45;
-        const sweep = Math.sin(2 * Math.PI * (3800 - 3400 * (s / dur)) * s) * Math.exp(-s * 7) * 0.2;
-        const ring = Math.sin(2 * Math.PI * 820 * s) * Math.exp(-Math.max(0, s - 0.14) * 20) * (s > 0.12 ? 0.32 : 0);
-        ch[i] = scrape + sweep + ring;
-      }
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      const g = ctx.createGain();
-      g.gain.value = 0.55;
-      src.connect(g);
-      g.connect(ctx.destination);
-      src.start();
-      src.onended = () => { try { ctx.close(); } catch { /* ignore */ } };
+      new Audio('https://taira-komori.net/sound_os2/jidaigeki01/katana1.mp3').play();
     } catch { /* audio not available */ }
   }
 
