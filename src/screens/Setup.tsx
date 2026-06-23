@@ -205,6 +205,27 @@ export default function Setup() {
           </div>
         )}
 
+        {/* Streaming */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--dim)', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+            Streaming
+          </div>
+          <input
+            type="text"
+            value={t.stream.instagramUrl}
+            onChange={e => store.setInstagramUrl(e.target.value)}
+            placeholder="Instagram: @kidsstop.tcg"
+            style={{ ...inputStyle }}
+          />
+          <input
+            type="text"
+            value={t.stream.youtubeUrl}
+            onChange={e => store.setYoutubeUrl(e.target.value)}
+            placeholder="YouTube: youtube.com/@kidsstoptcg"
+            style={{ ...inputStyle }}
+          />
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
           <button
             onClick={handleLoadRegistrations}
