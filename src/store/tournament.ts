@@ -21,6 +21,8 @@ function blankT(): Tournament {
     players: [],
     bk: null,
     savedAt: Date.now(),
+    timer: { duration: 1800, startedAt: null, running: false },
+    stream: { liveActive: false, instagramUrl: '', youtubeUrl: '' },
   };
 }
 
@@ -32,7 +34,14 @@ function loadSaved(): Tournament {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return blankT();
-    return JSON.parse(raw) as Tournament;
+    const saved = JSON.parse(raw) as Partial<Tournament>;
+    const blank = blankT();
+    return {
+      ...blank,
+      ...saved,
+      timer: saved.timer ?? blank.timer,
+      stream: saved.stream ?? blank.stream,
+    };
   } catch {
     return blankT();
   }
@@ -59,6 +68,14 @@ type TournamentStore = {
   exportJSON(): void;
   loadFromJSON(data: Tournament): void;
   loadRegistrations(code: string): Promise<{ count: number; loaded: number }>;
+  setTimerDuration(seconds: number): void;
+  startTimer(): void;
+  stopTimer(): void;
+  resetTimer(): void;
+  setLiveActive(active: boolean): void;
+  setInstagramUrl(url: string): void;
+  setYoutubeUrl(url: string): void;
+  reorderPlayers(fromIdx: number, toIdx: number): void;
 };
 
 export const useTournamentStore = create<TournamentStore>()(
@@ -130,17 +147,9 @@ export const useTournamentStore = create<TournamentStore>()(
     startTournament() {
       const { t } = get();
       if (t.players.length < 4) return;
-      const players = [...t.players];
-      if (t.seedMode === 'random') {
-        for (let i = players.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [players[i], players[j]] = [players[j], players[i]];
-        }
-      }
-      const bk = structuredClone(buildBracket(players));
+      const bk = structuredClone(buildBracket(t.players));
       resolveBracket(bk);
       set(s => {
-        s.t.players = players;
         s.t.bk = bk;
         s.t.status = 'running';
       });
@@ -237,6 +246,64 @@ export const useTournamentStore = create<TournamentStore>()(
       set(s => { s.t.players.push(...newPlayers); });
       persist(get().t);
       return { count: data.length, loaded: newPlayers.length };
+    },
+
+    setTimerDuration(seconds: number) {
+      set(s => {
+        s.t.timer.duration = seconds;
+        s.t.timer.startedAt = null;
+        s.t.timer.running = false;
+      });
+      persist(get().t);
+    },
+
+    startTimer() {
+      set(s => {
+        s.t.timer.startedAt = Date.now();
+        s.t.timer.running = true;
+      });
+      persist(get().t);
+    },
+
+    stopTimer() {
+      set(s => {
+        s.t.timer.startedAt = null;
+        s.t.timer.running = false;
+      });
+      persist(get().t);
+    },
+
+    resetTimer() {
+      set(s => {
+        s.t.timer.startedAt = null;
+        s.t.timer.running = false;
+      });
+      persist(get().t);
+    },
+
+    setLiveActive(active: boolean) {
+      set(s => { s.t.stream.liveActive = active; });
+      persist(get().t);
+    },
+
+    setInstagramUrl(url: string) {
+      set(s => { s.t.stream.instagramUrl = url; });
+      persist(get().t);
+    },
+
+    setYoutubeUrl(url: string) {
+      set(s => { s.t.stream.youtubeUrl = url; });
+      persist(get().t);
+    },
+
+    reorderPlayers(fromIdx: number, toIdx: number) {
+      set(s => {
+        const players = [...s.t.players];
+        const [moved] = players.splice(fromIdx, 1);
+        players.splice(toIdx, 0, moved);
+        s.t.players = players;
+      });
+      persist(get().t);
     },
   }))
 );

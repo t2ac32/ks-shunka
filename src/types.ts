@@ -53,6 +53,18 @@ export type Bracket = {
   N: number;
 };
 
+export type TimerState = {
+  duration: number;
+  startedAt: number | null;
+  running: boolean;
+};
+
+export type StreamState = {
+  liveActive: boolean;
+  instagramUrl: string;
+  youtubeUrl: string;
+};
+
 export type Tournament = {
   id: string;
   name: string;
@@ -63,4 +75,6 @@ export type Tournament = {
   bk: Bracket | null;
   savedAt: number;
   registrationCode?: string;
+  timer: TimerState;
+  stream: StreamState;
 };
