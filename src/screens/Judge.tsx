@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTournamentStore } from '../store/tournament';
 import { wins, availDecks, champion } from '../engine/bracket';
 import { deckColor, deckLabel } from '../data/archetypes';
 import DeckDot from '../components/DeckDot';
+import { timerRemaining, formatTimer } from '../lib/timer';
 import type { Match, Player } from '../types';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -784,6 +785,27 @@ export default function Judge() {
   const { t } = store;
   const [selMatchId, setSelMatchId] = useState<string | null>(null);
 
+  const timer = useTournamentStore(s => s.t.timer);
+  const setTimerDuration = useTournamentStore(s => s.setTimerDuration);
+  const startTimer = useTournamentStore(s => s.startTimer);
+  const stopTimer = useTournamentStore(s => s.stopTimer);
+  const resetTimer = useTournamentStore(s => s.resetTimer);
+  const [remaining, setRemaining] = useState(() => timerRemaining(timer));
+
+  useEffect(() => {
+    setRemaining(timerRemaining(timer));
+    if (!timer.running) return;
+    const id = setInterval(() => setRemaining(timerRemaining(timer)), 1000);
+    return () => clearInterval(id);
+  }, [timer.running, timer.startedAt, timer.duration]);
+
+  const PRESETS = [
+    { label: '30 min', seconds: 1800 },
+    { label: '45 min', seconds: 2700 },
+    { label: '50 min', seconds: 3000 },
+    { label: '75 min', seconds: 4500 },
+  ];
+
   const containerStyle: React.CSSProperties = {
     maxWidth: 560,
     margin: '0 auto',
@@ -817,6 +839,102 @@ export default function Judge() {
 
   return (
     <main style={containerStyle}>
+      {/* Timer section — always visible */}
+      <div style={{
+        background: 'var(--panel)',
+        borderRadius: 16,
+        padding: '18px 20px',
+        marginBottom: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+      }}>
+        <div style={{
+          fontFamily: 'var(--serif)',
+          fontSize: 14,
+          fontWeight: 700,
+          color: 'var(--accent2)',
+          letterSpacing: '.06em',
+        }}>
+          ⏱ Timer de Ronda
+        </div>
+
+        {/* Countdown display */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            fontFamily: 'var(--serif)',
+            fontSize: 48,
+            fontWeight: 800,
+            color: remaining <= 120 ? 'var(--accent)' : 'var(--accent2)',
+            letterSpacing: '.05em',
+            lineHeight: 1,
+          }}>
+            {formatTimer(remaining)}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 6, letterSpacing: '.06em' }}>
+            {timer.running ? 'En curso' : 'Ronda no iniciada'}
+          </div>
+        </div>
+
+        {/* Presets */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {PRESETS.map(({ label, seconds }) => (
+            <button
+              key={seconds}
+              onClick={() => setTimerDuration(seconds)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: `1px solid ${timer.duration === seconds ? 'color-mix(in srgb,var(--accent2) 50%,transparent)' : 'var(--line2)'}`,
+                background: 'var(--panel2)',
+                color: timer.duration === seconds ? 'var(--accent2)' : 'var(--dim)',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Start / Stop + Reset */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => timer.running ? stopTimer() : startTimer()}
+            style={{
+              flex: 1,
+              padding: 14,
+              borderRadius: 12,
+              border: 'none',
+              background: 'var(--accent)',
+              color: '#fff',
+              fontSize: 15,
+              fontWeight: 900,
+              letterSpacing: '.1em',
+              cursor: 'pointer',
+            }}
+          >
+            {timer.running ? '⏹ DETENER' : '▶ INICIAR RONDA'}
+          </button>
+          <button
+            onClick={resetTimer}
+            style={{
+              padding: '14px 18px',
+              borderRadius: 12,
+              border: '1px solid var(--line2)',
+              background: 'var(--panel2)',
+              color: 'var(--faint)',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            ↺
+          </button>
+        </div>
+      </div>
+
       <MatchList
         matches={bk.matches}
         players={t.players}
