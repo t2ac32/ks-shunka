@@ -321,8 +321,8 @@ export default function TV() {
                   <div
                     key={p.id}
                     draggable
-                    onDragStart={() => { setDragPlayerId(p.id); setDragFromSlot(null); }}
-                    onDragEnd={() => { setDragPlayerId(null); setDragFromSlot(null); }}
+                    onDragStart={() => setDragPlayerId(p.id)}
+                    onDragEnd={() => setDragPlayerId(null)}
                     style={{
                       padding: '9px 16px', borderRadius: 12,
                       border: '1px solid var(--line2)',
