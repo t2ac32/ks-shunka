@@ -223,9 +223,9 @@ export default function TV() {
               style={{
                 width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
                 border: p
-                  ? `1px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--faint)' : 'var(--line2)'}`
-                  : '1px dashed color-mix(in srgb,var(--line2) 45%,transparent)',
-                background: p ? 'var(--panel)' : 'color-mix(in srgb,var(--bg2) 60%,transparent)',
+                  ? `1px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--dim)' : 'var(--dim)'}`
+                  : '1px dashed var(--dim)',
+                background: p ? 'var(--panel)' : 'color-mix(in srgb,var(--panel) 30%,transparent)',
                 display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px',
                 cursor: p ? 'grab' : 'default',
                 opacity: isDragging ? 0.3 : 1,
@@ -234,12 +234,16 @@ export default function TV() {
                 userSelect: 'none',
               }}
             >
-              <span style={{ fontSize: 10, color: 'var(--faint)', fontWeight: 700, letterSpacing: '.06em', flexShrink: 0, minWidth: 18 }}>
+              <span style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '.06em', flexShrink: 0, minWidth: 18,
+                color: p ? 'var(--accent2)' : 'var(--dim)',
+                animation: p ? 'none' : 'gold-glow 2.5s ease-in-out infinite',
+              }}>
                 #{idx + 1}
               </span>
               {p
                 ? <span style={{ fontFamily: 'var(--serif)', fontSize: 14, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                : <span style={{ fontSize: 11, color: 'color-mix(in srgb,var(--faint) 55%,transparent)', fontStyle: 'italic' }}>arrastra aquí</span>
+                : <span style={{ fontSize: 12, color: 'var(--dim)', letterSpacing: '.04em' }}>arrastra aquí</span>
               }
             </div>
           );
