@@ -6,7 +6,6 @@ import {
   resolveBracket,
   recordGame as engineRecordGame,
   undoGame as engineUndoGame,
-  recomputeMatch,
 } from '../engine/bracket';
 import { supabase } from '../lib/supabase';
 
@@ -170,9 +169,6 @@ export const useTournamentStore = create<TournamentStore>()(
         if (!m) return;
         if (forSide === 1) m.ban.for1 = deckIdx;
         else m.ban.for2 = deckIdx;
-        if (m.ban.for1 !== null && m.ban.for2 !== null) {
-          recomputeMatch(s.t.bk, matchId);
-        }
       });
       persist(get().t);
     },
@@ -193,7 +189,6 @@ export const useTournamentStore = create<TournamentStore>()(
       set(s => {
         if (!s.t.bk) return;
         engineRecordGame(s.t.bk, matchId, d1, d2, winnerSide);
-        resolveBracket(s.t.bk);
       });
       persist(get().t);
     },
@@ -202,7 +197,6 @@ export const useTournamentStore = create<TournamentStore>()(
       set(s => {
         if (!s.t.bk) return;
         engineUndoGame(s.t.bk, matchId, gameIdx);
-        resolveBracket(s.t.bk);
       });
       persist(get().t);
     },

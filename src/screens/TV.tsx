@@ -121,7 +121,7 @@ export default function TV() {
       const inner = innerRef.current;
       if (!wrap || !inner) return;
       const natW = 1850;
-      const natH = inner.scrollHeight / scale;
+      const natH = inner.scrollHeight;
       const s = Math.min(wrap.clientWidth / natW, wrap.clientHeight / natH);
       setScale(Math.min(Math.max(s, 0.25), 1.9));
     };
@@ -137,7 +137,7 @@ export default function TV() {
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [bk, scale]);
+  }, [bk]);
 
   if (t.status !== 'running' || !bk) {
     return (
