@@ -25,8 +25,7 @@ function blankT(): Tournament {
 }
 
 function persist(t: Tournament): void {
-  t.savedAt = Date.now();
-  localStorage.setItem(LS_KEY, JSON.stringify(t));
+  localStorage.setItem(LS_KEY, JSON.stringify({ ...t, savedAt: Date.now() }));
 }
 
 function loadSaved(): Tournament {

@@ -16,13 +16,15 @@ export default function MainApp() {
     <div
       data-theme={theme}
       style={{
-        minHeight: '100vh',
-        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--bg)',
         color: 'var(--ink)',
-        overflow: 'hidden',
+        // TV needs a locked viewport so its scale transform fits without scrollbars.
+        // Setup and Judge must scroll freely.
+        ...(screen === 'tv'
+          ? { height: '100vh', overflow: 'hidden' }
+          : { minHeight: '100vh' }),
       }}
     >
       <Header
