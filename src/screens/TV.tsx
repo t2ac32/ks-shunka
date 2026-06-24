@@ -127,9 +127,9 @@ export default function TV() {
   const [lockedSlot, setLockedSlot] = useState<number | null>(null);
 
   // Bracket layout constants (pixels)
-  const SH = 52, SG = 8, MH = 2 * SH + SG, MG = 32;
+  const SH = 76, SG = 12, MH = 2 * SH + SG, MG = 56;
   const TH = 2 * MH + MG;
-  const EW = 22, AW = 44;
+  const EW = 36, AW = 72;
   const M1M = SH + SG / 2;
   const M2M = MH + MG + SH + SG / 2;
   const CM = Math.round((M1M + M2M) / 2);
@@ -221,7 +221,7 @@ export default function TV() {
               onDragStart={() => { if (p) setDragPlayerId(p.id); }}
               onDragEnd={() => setDragPlayerId(null)}
               style={{
-                width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
+                width: 240, height: SH, borderRadius: 12, boxSizing: 'border-box' as const,
                 border: p
                   ? `2px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--accent2)' : 'color-mix(in srgb,var(--accent2) 75%,var(--dim))'}`
                   : '2px solid color-mix(in srgb,var(--accent2) 55%,var(--dim))',
@@ -231,7 +231,7 @@ export default function TV() {
                 boxShadow: p
                   ? '0 0 14px color-mix(in srgb,var(--accent2) 30%,transparent)'
                   : undefined,
-                display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px',
+                display: 'flex', alignItems: 'center', gap: 14, padding: '0 18px',
                 cursor: p ? 'grab' : 'default',
                 opacity: isDragging ? 0.3 : 1,
                 animation: isLocked
@@ -244,7 +244,7 @@ export default function TV() {
               }}
             >
               <span style={{
-                fontSize: 13, fontWeight: 900, letterSpacing: '.06em', flexShrink: 0, minWidth: 18,
+                fontSize: 18, fontWeight: 900, letterSpacing: '.06em', flexShrink: 0, minWidth: 26,
                 color: 'var(--accent2)',
                 animation: p ? 'none' : 'gold-glow 2.5s ease-in-out infinite',
                 textShadow: p ? '0 0 8px color-mix(in srgb,var(--accent2) 45%,transparent)' : undefined,
@@ -252,8 +252,8 @@ export default function TV() {
                 #{idx + 1}
               </span>
               {p
-                ? <span style={{ fontFamily: 'var(--serif)', fontSize: 15, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(0,0,0,.5)' }}>{p.name}</span>
-                : <span style={{ fontSize: 13, fontWeight: 700, color: 'color-mix(in srgb,var(--ink) 75%,var(--dim))', letterSpacing: '.06em' }}>arrastra aquí</span>
+                ? <span style={{ fontFamily: 'var(--serif)', fontSize: 21, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textShadow: '0 1px 0 rgba(0,0,0,.5)' }}>{p.name}</span>
+                : <span style={{ fontSize: 17, fontWeight: 700, color: 'color-mix(in srgb,var(--ink) 75%,var(--dim))', letterSpacing: '.06em' }}>arrastra aquí</span>
               }
             </div>
           );
@@ -292,20 +292,20 @@ export default function TV() {
             {/* Header */}
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 800,
+                fontFamily: 'var(--serif)', fontSize: 32, fontWeight: 800,
                 background: 'linear-gradient(90deg,#b8860b,#ffd700,#ffe87c,#ffd700,#b8860b)',
                 backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                animation: 'shimmer 3s linear infinite', marginBottom: 6,
+                animation: 'shimmer 3s linear infinite', marginBottom: 8,
               }}>
                 春夏秋冬 · {t.name}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--faint)', letterSpacing: '.1em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 14, color: 'var(--faint)', letterSpacing: '.1em', textTransform: 'uppercase' }}>
                 Arrastra tu nombre al lugar del bracket · Suelta para fijar
               </div>
             </div>
 
             {/* Floating player cards */}
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 780 }}>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 1100 }}>
               {t.players.map((p, i) => {
                 const placed = draftSeeds.includes(p.id);
                 return (
@@ -315,12 +315,12 @@ export default function TV() {
                     onDragStart={() => setDragPlayerId(p.id)}
                     onDragEnd={() => setDragPlayerId(null)}
                     style={{
-                      padding: '9px 16px', borderRadius: 12,
+                      padding: '12px 22px', borderRadius: 14,
                       border: '1px solid var(--line2)',
                       background: placed ? 'color-mix(in srgb,var(--panel) 35%,transparent)' : 'var(--panel)',
                       cursor: 'grab',
                       animation: `draft-float ${2.4 + i * 0.3}s ease-in-out infinite`,
-                      fontFamily: 'var(--serif)', fontSize: 14,
+                      fontFamily: 'var(--serif)', fontSize: 18,
                       fontWeight: placed ? 400 : 700,
                       color: placed ? 'var(--faint)' : 'var(--ink)',
                       userSelect: 'none', opacity: dragPlayerId === p.id ? 0.35 : 1,
@@ -346,19 +346,19 @@ export default function TV() {
               </div>
 
               {/* Center column — trophy + horizontal connecting line */}
-              <div style={{ width: 110, height: TH, position: 'relative', flexShrink: 0 }}>
+              <div style={{ width: 170, height: TH, position: 'relative', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', top: CM - 1, left: 0, right: 0, height: 2, background: 'var(--dim)' }} />
                 <div style={{
                   position: 'absolute', top: CM, left: '50%',
                   transform: 'translate(-50%, -50%)', zIndex: 1,
-                  textAlign: 'center', padding: '10px 14px',
+                  textAlign: 'center', padding: '14px 20px',
                   background: 'var(--bg)',
                   border: '2px solid color-mix(in srgb,var(--accent2) 75%,var(--dim))',
-                  borderRadius: 12,
-                  boxShadow: '0 0 18px color-mix(in srgb,var(--accent2) 35%,transparent)',
+                  borderRadius: 14,
+                  boxShadow: '0 0 22px color-mix(in srgb,var(--accent2) 35%,transparent)',
                 }}>
-                  <div style={{ fontSize: 28 }}>🏆</div>
-                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--accent2)', marginTop: 3 }}>
+                  <div style={{ fontSize: 40 }}>🏆</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--accent2)', marginTop: 4 }}>
                     Final
                   </div>
                 </div>
@@ -381,9 +381,9 @@ export default function TV() {
                 <button
                   onClick={handleDraftStart}
                   style={{
-                    padding: '13px 36px', borderRadius: 12, border: 'none',
+                    padding: '18px 48px', borderRadius: 14, border: 'none',
                     background: 'var(--accent)', color: '#fff',
-                    fontSize: 15, fontWeight: 900, letterSpacing: '.1em', cursor: 'pointer',
+                    fontSize: 19, fontWeight: 900, letterSpacing: '.1em', cursor: 'pointer',
                     boxShadow: '0 0 22px color-mix(in srgb,var(--accent) 50%,transparent)',
                     animation: 'glow-pulse 2s ease-in-out infinite',
                   }}
@@ -392,11 +392,11 @@ export default function TV() {
                 </button>
               )}
               {!allPlaced && t.players.length >= 4 && (
-                <div style={{ fontSize: 11, color: 'var(--faint)', letterSpacing: '.06em' }}>
+                <div style={{ fontSize: 14, color: 'var(--faint)', letterSpacing: '.06em' }}>
                   Coloca a todos los jugadores para iniciar
                 </div>
               )}
-              <div style={{ fontSize: 10, color: 'color-mix(in srgb,var(--faint) 60%,transparent)', letterSpacing: '.06em' }}>
+              <div style={{ fontSize: 12, color: 'color-mix(in srgb,var(--faint) 60%,transparent)', letterSpacing: '.06em' }}>
                 Se bloquea al iniciar la primera ronda
               </div>
             </div>
@@ -478,35 +478,8 @@ export default function TV() {
                   {t.name}
                 </span>
 
-                {/* Timer display — centered */}
-                <div style={{
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  background: 'var(--panel)',
-                  border: '1px solid var(--line2)',
-                  borderRadius: 12,
-                  padding: '5px 16px',
-                  textAlign: 'center',
-                  minWidth: 110,
-                }}>
-                  <div style={{ fontSize: 9, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--faint)' }}>
-                    ⏱ Tiempo
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--serif)',
-                    fontSize: 28,
-                    fontWeight: 800,
-                    letterSpacing: '.05em',
-                    lineHeight: 1,
-                    color: remaining <= 120 ? 'var(--accent)' : 'var(--accent2)',
-                    animation: remaining <= 120 ? 'glow-pulse 0.8s ease-in-out infinite' : 'gold-glow 2s ease-in-out infinite',
-                  }}>
-                    {formatTimer(remaining)}
-                  </div>
-                </div>
-
                 {/* Right: EN VIVO + legend */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                   <button
                     onClick={() => setLiveActive(!stream.liveActive)}
                     style={{
@@ -583,17 +556,41 @@ export default function TV() {
                   />
                 </div>
 
-                {/* Right column: Champion + Gran Final */}
+                {/* Right column: Timer + Champion + Gran Final */}
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     gap: 16,
-                    minWidth: 230,
+                    minWidth: 260,
                     alignSelf: 'stretch',
                   }}
                 >
+                  {/* Round timer — sits above Campeón */}
+                  <div style={{
+                    background: 'var(--panel)',
+                    border: '1px solid var(--line2)',
+                    borderRadius: 14,
+                    padding: '14px 18px',
+                    textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 12, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--faint)', marginBottom: 6 }}>
+                      ⏱ Tiempo
+                    </div>
+                    <div style={{
+                      fontFamily: 'var(--serif)',
+                      fontSize: 56,
+                      fontWeight: 800,
+                      letterSpacing: '.05em',
+                      lineHeight: 1,
+                      color: remaining <= 120 ? 'var(--accent)' : 'var(--accent2)',
+                      animation: remaining <= 120 ? 'glow-pulse 0.8s ease-in-out infinite' : 'gold-glow 2s ease-in-out infinite',
+                    }}>
+                      {formatTimer(remaining)}
+                    </div>
+                  </div>
+
                   {/* Champion card — always rendered, faded if no champion yet */}
                   <div
                     style={{
