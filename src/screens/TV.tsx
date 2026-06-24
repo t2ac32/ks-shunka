@@ -172,7 +172,7 @@ export default function TV() {
       const wrap = wrapRef.current;
       const inner = innerRef.current;
       if (!wrap || !inner) return;
-      const natW = 1850;
+      const natW = 1500;
       const natH = inner.scrollHeight;
       const s = Math.min(wrap.clientWidth / natW, wrap.clientHeight / natH);
       setScale(Math.min(Math.max(s, 0.25), 1.9));
@@ -224,7 +224,7 @@ export default function TV() {
                 width: 160, height: SH, borderRadius: 10, boxSizing: 'border-box' as const,
                 border: p
                   ? `2px solid ${isLocked ? 'var(--accent2)' : isDragging ? 'var(--accent2)' : 'color-mix(in srgb,var(--accent2) 75%,var(--dim))'}`
-                  : '2px dashed color-mix(in srgb,var(--accent2) 55%,var(--dim))',
+                  : '2px solid color-mix(in srgb,var(--accent2) 55%,var(--dim))',
                 background: p
                   ? 'linear-gradient(135deg,color-mix(in srgb,var(--accent2) 10%,var(--panel)),var(--panel))'
                   : 'color-mix(in srgb,var(--panel) 75%,transparent)',
@@ -445,8 +445,8 @@ export default function TV() {
                 position: 'absolute',
                 top: 0,
                 left: '50%',
-                width: 1850,
-                marginLeft: -925,
+                width: 1500,
+                marginLeft: -750,
                 transform: `scale(${scale})`,
                 transformOrigin: 'top center',
                 padding: '14px 4px',
@@ -569,7 +569,7 @@ export default function TV() {
                     barColor="var(--accent2)"
                     title="Winners Bracket"
                     kanji="勝者"
-                    minCardHeight={470}
+                    minCardHeight={560}
                   />
                   <BracketSection
                     bk={bk}
@@ -579,7 +579,7 @@ export default function TV() {
                     barColor="var(--dim)"
                     title="Losers Bracket"
                     kanji="敗者"
-                    minCardHeight={300}
+                    minCardHeight={380}
                   />
                 </div>
 

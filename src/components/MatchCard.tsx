@@ -10,9 +10,9 @@ type Props = {
 
 const scoreStyle: React.CSSProperties = {
   fontFamily: "'Shippori Mincho', serif",
-  fontSize: 16,
+  fontSize: 18,
   fontWeight: 800,
-  minWidth: 12,
+  minWidth: 14,
   textAlign: 'right',
   color: 'var(--accent2)',
 };
@@ -35,12 +35,12 @@ export default function MatchCard({ match, players, topLabel, bottomLabel }: Pro
     const base: React.CSSProperties = {
       display: 'flex',
       alignItems: 'center',
-      gap: 6,
-      fontSize: 13,
+      gap: 8,
+      fontSize: 15,
       overflow: 'hidden',
     };
     if (pending) {
-      return { ...base, fontStyle: 'italic', color: 'var(--faint)' };
+      return { ...base, fontStyle: 'italic', color: 'var(--dim)' };
     }
     if (pid === 'BYE') {
       return { ...base, fontStyle: 'italic', color: 'var(--faint)' };
@@ -72,16 +72,16 @@ export default function MatchCard({ match, players, topLabel, bottomLabel }: Pro
 
   return (
     <div style={{
-      width: 160,
-      borderRadius: 11,
+      width: 200,
+      borderRadius: 12,
       background: 'var(--panel2)',
-      padding: '10px 12px',
+      padding: '12px 14px',
       border: cardBorder,
       boxShadow: cardShadow,
-      opacity: pending ? 0.45 : 1,
+      opacity: pending ? 0.55 : 1,
     }}>
       {topLabel && (
-        <div style={{ fontSize: 10, color: 'var(--faint)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ fontSize: 11, color: 'var(--faint)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           {topLabel}
         </div>
       )}
@@ -91,7 +91,7 @@ export default function MatchCard({ match, players, topLabel, bottomLabel }: Pro
         </span>
         {!pending && <span style={scoreStyle}>{s1}</span>}
       </div>
-      <div style={{ height: 1, background: 'var(--line)', margin: '4px 0' }} />
+      <div style={{ height: 1, background: 'var(--line)', margin: '6px 0' }} />
       <div style={rowStyle('p2')}>
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {p2IsBye ? <em>BYE</em> : p2Name}
@@ -99,7 +99,7 @@ export default function MatchCard({ match, players, topLabel, bottomLabel }: Pro
         {!pending && <span style={scoreStyle}>{s2}</span>}
       </div>
       {bottomLabel && (
-        <div style={{ fontSize: 10, color: 'var(--faint)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           {bottomLabel}
         </div>
       )}
