@@ -66,8 +66,8 @@ a { color: inherit; text-decoration: none; }
 
 /* Theme: Dotonbori — default */
 :root {
-  --bg:        #33322f;
-  --bg2:       #3d3b37;
+  --bg:        #0d0500;
+  --bg2:       #180a02;
   --panel:     #1f0e04;
   --panel2:    #2a1208;
   --line:      #4a1e08;
