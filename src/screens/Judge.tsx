@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTournamentStore } from '../store/tournament';
 import { wins, availDecks, champion } from '../engine/bracket';
-import { deckColor, deckLabel } from '../data/archetypes';
+import { deckColor, deckLabel, deckSprites } from '../data/archetypes';
 import DeckDot from '../components/DeckDot';
+import DeckSprites from '../components/DeckSprites';
 import { timerRemaining, formatTimer } from '../lib/timer';
 import type { Match, Player } from '../types';
 
@@ -445,6 +446,7 @@ function MatchDetail({ matchId, matches, players, onBack, store }: MatchDetailPr
                 const isBanned = m.ban.for1 === i;
                 const color = deckColor(d);
                 const label = deckLabel(d) ?? `Mazo ${i + 1}`;
+                const sprites = deckSprites(d);
                 return (
                   <button
                     key={i}
@@ -459,9 +461,12 @@ function MatchDetail({ matchId, matches, players, onBack, store }: MatchDetailPr
                       background: isBanned ? 'color-mix(in srgb, var(--bad) 10%, var(--panel2))' : 'var(--panel2)',
                       cursor: 'pointer',
                       textAlign: 'left',
+                      opacity: isBanned ? 0.6 : 1,
                     }}
                   >
-                    <DeckDot color={color} size={20} />
+                    {sprites.length > 0
+                      ? <DeckSprites paths={sprites} size={30} />
+                      : <DeckDot color={color} size={20} />}
                     <span style={{
                       flex: 1,
                       textDecoration: isBanned ? 'line-through' : 'none',
@@ -497,6 +502,7 @@ function MatchDetail({ matchId, matches, players, onBack, store }: MatchDetailPr
                 const isBanned = m.ban.for2 === i;
                 const color = deckColor(d);
                 const label = deckLabel(d) ?? `Mazo ${i + 1}`;
+                const sprites = deckSprites(d);
                 return (
                   <button
                     key={i}
@@ -511,9 +517,12 @@ function MatchDetail({ matchId, matches, players, onBack, store }: MatchDetailPr
                       background: isBanned ? 'color-mix(in srgb, var(--bad) 10%, var(--panel2))' : 'var(--panel2)',
                       cursor: 'pointer',
                       textAlign: 'left',
+                      opacity: isBanned ? 0.6 : 1,
                     }}
                   >
-                    <DeckDot color={color} size={20} />
+                    {sprites.length > 0
+                      ? <DeckSprites paths={sprites} size={30} />
+                      : <DeckDot color={color} size={20} />}
                     <span style={{
                       flex: 1,
                       textDecoration: isBanned ? 'line-through' : 'none',

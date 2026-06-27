@@ -2,37 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import type { DeckRef } from '../types';
 import { ARCHETYPES, archetypeSpritePaths, deckColor, deckSprites } from '../data/archetypes';
 import DeckDot from './DeckDot';
+import DeckSprites from './DeckSprites';
 
 type Props = {
   value: DeckRef;
   slot: number;
   onChange: (v: DeckRef) => void;
 };
-
-function Sprites({ paths, size = 24 }: { paths: string[]; size?: number }) {
-  if (paths.length === 0) return null;
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
-      {paths.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          width={size}
-          height={size}
-          style={{
-            width: size,
-            height: size,
-            objectFit: 'contain',
-            imageRendering: 'pixelated',
-            marginLeft: i === 0 ? 0 : -size * 0.35,
-            filter: 'drop-shadow(0 1px 1px rgba(0,0,0,.5))',
-          }}
-        />
-      ))}
-    </span>
-  );
-}
 
 export default function DeckPicker({ value, slot, onChange }: Props) {
   const [open, setOpen] = useState(false);
@@ -117,7 +93,7 @@ export default function DeckPicker({ value, slot, onChange }: Props) {
         }}
       >
         <DeckDot color={color} />
-        {sprites.length > 0 && <Sprites paths={sprites} size={28} />}
+        {sprites.length > 0 && <DeckSprites paths={sprites} size={28} />}
         <span style={{
           flex: 1,
           minWidth: 0,
@@ -170,7 +146,7 @@ export default function DeckPicker({ value, slot, onChange }: Props) {
                 onClick={() => pickArchetype(a.id)}
                 style={optionStyle(!!selected)}
               >
-                <Sprites paths={archetypeSpritePaths(a)} size={28} />
+                <DeckSprites paths={archetypeSpritePaths(a)} size={28} />
                 <span style={{
                   flex: 1,
                   minWidth: 0,
