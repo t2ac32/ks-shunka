@@ -1,26 +1,44 @@
 import type { DeckRef } from '../types';
 
-export type Archetype = { id: string; name: string; color: string };
+export type Archetype = {
+  id: string;
+  name: string;
+  color: string;
+  sprites: string[];
+};
+
+const SPRITE_BASE = `${import.meta.env.BASE_URL ?? '/'}sprites`;
+
+function spritePath(name: string): string {
+  return `${SPRITE_BASE}/${name}.png`;
+}
 
 export const ARCHETYPES: Archetype[] = [
-  { id: 'charizard',   name: 'Charizard ex',    color: '#E8503A' },
-  { id: 'dragapult',   name: 'Dragapult ex',     color: '#9c5bd0' },
-  { id: 'gardevoir',   name: 'Gardevoir ex',     color: '#B45FB0' },
-  { id: 'ragingbolt',  name: 'Raging Bolt ex',   color: '#d2a72b' },
-  { id: 'gholdengo',   name: 'Gholdengo ex',     color: '#caa23c' },
-  { id: 'miraidon',    name: 'Miraidon ex',       color: '#F2C744' },
-  { id: 'regidrago',   name: 'Regidrago VSTAR',  color: '#c98a2a' },
-  { id: 'lugia',       name: 'Lugia VSTAR',       color: '#cfc7b0' },
-  { id: 'lostbox',     name: 'Lost Zone Box',     color: '#4A90D9' },
-  { id: 'roaringmoon', name: 'Roaring Moon ex',  color: '#5a5470' },
-  { id: 'ironthorns',  name: 'Iron Thorns ex',   color: '#e0c14a' },
-  { id: 'terapagos',   name: 'Terapagos ex',     color: '#7fb9c9' },
-  { id: 'snorlax',     name: 'Snorlax Stall',    color: '#9aa0a8' },
-  { id: 'pidgeot',     name: 'Pidgeot Control',  color: '#b79b6a' },
-  { id: 'grimmsnarl',  name: 'Grimmsnarl ex',    color: '#6a5a8a' },
-  { id: 'banette',     name: 'Banette ex',        color: '#9b6fb0' },
-  { id: 'archaludon',  name: 'Archaludon ex',    color: '#7f8a9a' },
-  { id: 'conkeldurr',  name: 'Conkeldurr',        color: '#C0603A' },
+  { id: 'dragapult',          name: 'Dragapult ex',                color: '#9c5bd0', sprites: ['dragapult'] },
+  { id: 'ns-zoroark',         name: "N's Zoroark ex",              color: '#6e4a73', sprites: ['zoroark'] },
+  { id: 'crustle',            name: 'Crustle Mysterious Rock Inn', color: '#b07050', sprites: ['crustle'] },
+  { id: 'slowking',           name: 'Slowking Seek Inspiration',   color: '#d896c0', sprites: ['slowking'] },
+  { id: 'hydrapple',          name: 'Hydrapple ex',                color: '#7dc775', sprites: ['hydrapple'] },
+  { id: 'alakazam',           name: 'Alakazam Powerful Hand',      color: '#b48a5c', sprites: ['alakazam'] },
+  { id: 'raging-bolt',        name: 'Raging Bolt ex',              color: '#d2a72b', sprites: ['raging-bolt'] },
+  { id: 'ogerpon-box',        name: 'Ogerpon Box',                 color: '#4aa872', sprites: ['ogerpon', 'ogerpon-wellspring'] },
+  { id: 'lillies-clefairy',   name: "Lillie's Clefairy ex",        color: '#f0b5d2', sprites: ['clefairy'] },
+  { id: 'rockets-honchkrow',  name: "Rocket's Honchkrow",          color: '#4a4a55', sprites: ['honchkrow', 'porygon2'] },
+  { id: 'festival-lead',      name: 'Festival Lead',               color: '#a8c574', sprites: ['dipplin', 'thwackey'] },
+  { id: 'mega-lucario',       name: 'Mega Lucario ex',             color: '#4a82c0', sprites: ['lucario-mega'] },
+  { id: 'rockets-mewtwo',     name: "Rocket's Mewtwo ex",          color: '#9c7fb5', sprites: ['mewtwo', 'spidops'] },
+  { id: 'hops-trevenant',     name: "Hop's Trevenant",             color: '#8a6a45', sprites: ['trevenant'] },
+  { id: 'beedrill',           name: 'Beedrill ex',                 color: '#d2b545', sprites: ['beedrill'] },
+  { id: 'ethans-typhlosion',  name: "Ethan's Typhlosion",          color: '#d27545', sprites: ['typhlosion'] },
+  { id: 'cynthias-garchomp',  name: "Cynthia's Garchomp ex",       color: '#4a85a0', sprites: ['garchomp'] },
+  { id: 'metagross',          name: 'Metagross Metal Maker',       color: '#7090b5', sprites: ['metagross'] },
+  { id: 'mega-lopunny',       name: 'Mega Lopunny ex',             color: '#c89880', sprites: ['lopunny-mega'] },
+  { id: 'marnies-grimmsnarl', name: "Marnie's Grimmsnarl ex",      color: '#6a5a8a', sprites: ['grimmsnarl'] },
+  { id: 'mega-starmie',       name: 'Mega Starmie ex',             color: '#c54860', sprites: ['starmie-mega'] },
+  { id: 'mega-greninja',      name: 'Mega Greninja ex',            color: '#3a78b5', sprites: ['greninja-mega'] },
+  { id: 'ogerpon-meganium',   name: 'Ogerpon Meganium',            color: '#7ab578', sprites: ['ogerpon', 'meganium'] },
+  { id: 'sylveon',            name: 'Sylveon Safeguard',           color: '#f0a8c5', sprites: ['sylveon'] },
+  { id: 'archaludon',         name: 'Archaludon ex',               color: '#7f8a9a', sprites: ['archaludon'] },
 ];
 
 export const CUSTOM_COLOR = '#8a7d70';
@@ -36,4 +54,14 @@ export function deckLabel(deck: DeckRef): string | null {
   if (!deck) return null;
   if ('custom' in deck) return deck.name;
   return ARCHETYPES.find(a => a.id === deck.id)?.name ?? deck.id;
+}
+
+export function deckSprites(deck: DeckRef): string[] {
+  if (!deck || 'custom' in deck) return [];
+  const a = ARCHETYPES.find(a => a.id === deck.id);
+  return a ? a.sprites.map(spritePath) : [];
+}
+
+export function archetypeSpritePaths(a: Archetype): string[] {
+  return a.sprites.map(spritePath);
 }
