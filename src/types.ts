@@ -10,6 +10,10 @@ export type Player = {
   name: string;
   nickname?: string;
   decks: [DeckRef, DeckRef, DeckRef, DeckRef];
+  // full_name as it currently exists in the `registrations` table for this
+  // tournament_code. Tracks the DB primary-key half so renames can target the
+  // right row. Undefined for players added manually in Setup.
+  dbName?: string;
 };
 
 export type MatchSource = {

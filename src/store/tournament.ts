@@ -57,6 +57,7 @@ type TournamentStore = {
   addPlayer(name: string): void;
   removePlayer(id: string): void;
   renamePlayer(id: string, name: string): void;
+  commitPlayerName(id: string): Promise<void>;
   pickDeck(playerId: string, slot: 0 | 1 | 2 | 3, value: DeckRef): void;
   shuffle(): void;
   startTournament(): void;
@@ -115,8 +116,19 @@ export const useTournamentStore = create<TournamentStore>()(
     },
 
     removePlayer(id) {
+      const state = get().t;
+      const removed = state.players.find(p => p.id === id);
       set(s => { s.t.players = s.t.players.filter(p => p.id !== id); });
       persist(get().t);
+      if (state.registrationCode && removed?.dbName) {
+        supabase
+          .from('registrations')
+          .delete()
+          .match({ tournament_code: state.registrationCode, full_name: removed.dbName })
+          .then(({ error }) => {
+            if (error) console.error('[removePlayer] supabase delete failed:', error);
+          });
+      }
     },
 
     renamePlayer(id, name) {
@@ -127,12 +139,44 @@ export const useTournamentStore = create<TournamentStore>()(
       persist(get().t);
     },
 
+    async commitPlayerName(id) {
+      const state = get().t;
+      const p = state.players.find(pl => pl.id === id);
+      if (!p || !state.registrationCode || !p.dbName) return;
+      const newName = p.name.trim();
+      if (!newName || newName === p.dbName) return;
+      const { error } = await supabase
+        .from('registrations')
+        .update({ full_name: newName })
+        .match({ tournament_code: state.registrationCode, full_name: p.dbName });
+      if (error) {
+        console.error('[commitPlayerName] supabase update failed:', error);
+        return;
+      }
+      set(s => {
+        const pl = s.t.players.find(x => x.id === id);
+        if (pl) pl.dbName = newName;
+      });
+      persist(get().t);
+    },
+
     pickDeck(playerId, slot, value) {
       set(s => {
         const p = s.t.players.find(pl => pl.id === playerId);
         if (p) p.decks[slot] = value;
       });
       persist(get().t);
+      const state = get().t;
+      const p = state.players.find(pl => pl.id === playerId);
+      if (state.registrationCode && p?.dbName) {
+        supabase
+          .from('registrations')
+          .update({ decks: p.decks })
+          .match({ tournament_code: state.registrationCode, full_name: p.dbName })
+          .then(({ error }) => {
+            if (error) console.error('[pickDeck] supabase update failed:', error);
+          });
+      }
     },
 
     shuffle() {
@@ -257,6 +301,7 @@ export const useTournamentStore = create<TournamentStore>()(
           decks: (r.decks as DeckRef[]).slice(0, 4).concat(
             Array<DeckRef>(Math.max(0, 4 - (r.decks as DeckRef[]).length)).fill(null)
           ) as [DeckRef, DeckRef, DeckRef, DeckRef],
+          dbName: r.full_name,
         }));
       set(s => { s.t.players = loadedPlayers; });
       persist(get().t);
