@@ -379,6 +379,7 @@ export default function Setup() {
                   <input
                     value={p.name}
                     onChange={e => store.renamePlayer(p.id, e.target.value)}
+                    onBlur={() => store.commitPlayerName(p.id)}
                     style={{
                       flex: 1,
                       minWidth: 0,
@@ -401,7 +402,15 @@ export default function Setup() {
                     {filledCount}/4
                   </span>
                   <button
-                    onClick={() => store.removePlayer(p.id)}
+                    onClick={() => {
+                      if (p.dbName) {
+                        const ok = window.confirm(
+                          `¿Eliminar a "${p.name}" del torneo? También se borrará su registro en la base de datos.`
+                        );
+                        if (!ok) return;
+                      }
+                      store.removePlayer(p.id);
+                    }}
                     style={{
                       width: 32,
                       height: 32,
