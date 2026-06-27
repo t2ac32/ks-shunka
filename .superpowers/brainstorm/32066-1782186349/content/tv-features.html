@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TV Screen Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Shippori+Mincho:wght@500;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #050200;
+  color: #ffefd5;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── KEYFRAMES ── */
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); box-shadow: 0 0 0 0 #ff220066; }
+  50% { opacity:.7; transform:scale(.85); box-shadow: 0 0 0 6px #ff220000; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 8px #ff220066, 0 0 24px #ff220033; }
+  50% { box-shadow: 0 0 16px #ff2200aa, 0 0 40px #ff220055; }
+}
+@keyframes gold-glow {
+  0%,100% { text-shadow: 0 0 10px #ffd70088; }
+  50% { text-shadow: 0 0 20px #ffd700cc, 0 0 40px #ffd70066; }
+}
+@keyframes timer-tick {
+  0%,100% { opacity:1; }
+  50% { opacity:.7; }
+}
+@keyframes draft-float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── TV CONTAINER ── */
+.tv-screen {
+  flex: 1;
+  background: #0d0500;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.tv-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, #ff220008 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── TOP BAR ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid #4a1e08;
+}
+.kanji-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.kanji {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #b8860b, #ffd700, #ffe87c, #ffd700, #b8860b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+.tourney-name {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffefd5;
+  letter-spacing: .04em;
+}
+
+/* ── TIMER ── */
+.timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1f0e04;
+  border: 1px solid #4a1e08;
+  border-radius: 12px;
+  padding: 6px 18px;
+}
+.timer-label {
+  font-size: 9px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #7a4e32;
+}
+.timer-time {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #ffd700;
+  animation: gold-glow 2s ease-in-out infinite;
+  letter-spacing: .05em;
+  line-height: 1;
+}
+.timer-time.danger {
+  color: #ff2200;
+  animation: glow-pulse .8s ease-in-out infinite;
+}
+
+/* ── EN VIVO BUTTON ── */
+.live-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ff2200;
+  color: #fff;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+.live-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse-dot 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #7a4e32;
+  letter-spacing: .05em;
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+/* ── BRACKET GRID ── */
+.bracket-grid {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.bracket-left { display: flex; flex-direction: column; gap: 12px; }
+
+.bracket-section { }
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.section-bar {
+  width: 3px; height: 18px; border-radius: 2px; flex-shrink: 0;
+}
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.section-kanji {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 13px;
+  color: #7a4e32;
+}
+.rounds { display: flex; gap: 10px; }
+.round { display: flex; flex-direction: column; gap: 6px; }
+.round-label {
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #7a4e32;
+  margin-bottom: 2px;
+}
+
+/* ── MATCH CARD ── */
+.mc {
+  width: 150px;
+  background: #2a1208;
+  border-radius: 9px;
+  border: 1px solid #4a1e08;
+  padding: 7px 10px;
+}
+.mc.live {
+  border-color: #ff2200;
+  box-shadow: 0 0 0 1px #ff220044, 0 0 12px #ff220033;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+.mc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+  font-size: 11px;
+}
+.mc-name { color: #ffefd5; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; }
+.mc-name.winner { color: #ffd700; }
+.mc-name.loser { color: #7a4e32; text-decoration: line-through; }
+.mc-name.bye { color: #4a1e08; font-style: italic; }
+.mc-score { font-family: 'Shippori Mincho', serif; font-size: 14px; font-weight: 800; color: #ffd700; }
+.mc-score.muted { color: #4a1e08; }
+.mc-divider { height: 1px; background: #4a1e08; margin: 3px 0; }
+
+/* ── RIGHT COLUMN ── */
+.bracket-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+.champion-card {
+  background: linear-gradient(135deg, color-mix(in srgb,#ffd700 12%,#1f0e04), #2a1208);
+  border: 1px solid #6b2c0e;
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.champ-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #7a4e32; }
+.champ-emoji { font-size: 22px; margin: 4px 0; }
+.champ-name {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd700;
+  animation: gold-glow 2s ease-in-out infinite;
+}
+.gf-section { }
+.gf-label {
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #c4916a;
+  margin-bottom: 6px;
+}
+
+/* ── STREAMING BANNER ── */
+.stream-banner {
+  background: #1f0e04;
+  border-top: 1px solid #ff220033;
+  padding: 6px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+.stream-banner::before,
+.stream-banner::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60px;
+  z-index: 1;
+}
+.stream-banner::before { left: 0; background: linear-gradient(90deg, #1f0e04, transparent); }
+.stream-banner::after { right: 0; background: linear-gradient(-90deg, #1f0e04, transparent); }
+.ticker-track {
+  display: inline-block;
+  animation: ticker 20s linear infinite;
+}
+.ticker-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 12px;
+  color: #c4916a;
+}
+.ticker-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff2200;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+.ticker-sep { color: #4a1e08; }
+.ticker-link { color: #ffd700; font-weight: 700; }
+
+/* ── DRAFT SCREEN OVERLAY ── */
+.draft-overlay {
+  position: absolute;
+  inset: 0;
+  background: #0d0500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px;
+}
+.draft-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: .06em;
+  animation: gold-glow 2s ease-in-out infinite;
+}
+.draft-sub {
+  font-size: 12px;
+  color: #7a4e32;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.draft-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 700px;
+}
+.draft-card {
+  background: #1f0e04;
+  border: 1px solid #4a1e08;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: grab;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+  animation: draft-float 3s ease-in-out infinite;
+}
+.draft-card:nth-child(2) { animation-delay: .4s; }
+.draft-card:nth-child(3) { animation-delay: .8s; }
+.draft-card:nth-child(4) { animation-delay: 1.2s; }
+.draft-card:nth-child(5) { animation-delay: 1.6s; }
+.draft-card:nth-child(6) { animation-delay: 2s; }
+.draft-card:nth-child(7) { animation-delay: 2.4s; }
+.draft-card:nth-child(8) { animation-delay: 2.8s; }
+.draft-card:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px #ffd70044;
+  transform: translateY(-4px) scale(1.03);
+}
+.draft-seed {
+  font-size: 10px;
+  color: #7a4e32;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.draft-name {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffefd5;
+}
+.draft-arrows {
+  font-size: 10px;
+  color: #4a1e08;
+  margin-top: 6px;
+}
+.draft-hint {
+  font-size: 11px;
+  color: #4a1e08;
+  letter-spacing: .06em;
+}
+.draft-start-btn {
+  background: #ff2200;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  cursor: pointer;
+  box-shadow: 0 0 16px #ff220066;
+}
+
+/* ── TABS FOR MOCKUP ── */
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0;
+  background: #050200;
+  border-bottom: 1px solid #1f0e04;
+}
+.tab {
+  padding: 7px 16px;
+  border-radius: 8px 8px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #1f0e04;
+  color: #7a4e32;
+  border: 1px solid #4a1e08;
+  border-bottom: none;
+  transition: all .15s;
+}
+.tab.active {
+  background: #0d0500;
+  color: #ffd700;
+  border-color: #4a1e08;
+}
+.page { display: none; flex: 1; flex-direction: column; }
+.page.active { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showPage('tournament')">📺 TV — Torneo en vivo</div>
+  <div class="tab" onclick="showPage('draft')">🃏 TV — Selección de posición</div>
+  <div class="tab" onclick="showPage('judge-timer')">⏱ Juez — Timer</div>
+</div>
+
+<!-- PAGE 1: TV en vivo -->
+<div class="page active" id="page-tournament">
+  <div class="tv-screen">
+    <div class="top-bar">
+      <div class="kanji-title">
+        <span class="kanji">春夏秋冬</span>
+        <span class="tourney-name">Shunka Shūtō · Kids Stop</span>
+      </div>
+      <div class="timer-display">
+        <div class="timer-label">⏱ Tiempo de ronda</div>
+        <div class="timer-time">27:34</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="live-btn"><div class="live-dot"></div>EN VIVO</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#ff2200;box-shadow:0 0 6px #ff220088;"></div>En juego</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffd700;"></div>Ganador</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bracket -->
+    <div class="bracket-grid">
+      <div class="bracket-left">
+        <!-- WB -->
+        <div class="bracket-section">
+          <div class="section-header">
+            <div class="section-bar" style="background:#ffd700;"></div>
+            <div class="section-title" style="color:#ffd700;">Winners</div>
+            <div class="section-kanji">勝者</div>
+          </div>
+          <div class="rounds">
+            <div class="round">
+              <div class="round-label">Ronda 1</div>
+              <div class="mc live">
+                <div class="mc-row"><span class="mc-name winner">Kaito</span><span class="mc-score">2</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name loser">Ren</span><span class="mc-score">0</span></div>
+              </div>
+              <div class="mc live">
+                <div class="mc-row"><span class="mc-name">Aoi</span><span class="mc-score muted">1</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name">Sora</span><span class="mc-score muted">1</span></div>
+              </div>
+              <div class="mc">
+                <div class="mc-row"><span class="mc-name">Hana</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name">Yuki</span><span class="mc-score muted">—</span></div>
+              </div>
+              <div class="mc">
+                <div class="mc-row"><span class="mc-name">Mika</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name">Taro</span><span class="mc-score muted">—</span></div>
+              </div>
+            </div>
+            <div class="round">
+              <div class="round-label">Semifinal</div>
+              <div class="mc" style="opacity:.45">
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+              </div>
+              <div class="mc" style="opacity:.45">
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+              </div>
+            </div>
+            <div class="round">
+              <div class="round-label">Final WB</div>
+              <div class="mc" style="opacity:.25">
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LB -->
+        <div class="bracket-section">
+          <div class="section-header">
+            <div class="section-bar" style="background:#7a4e32;"></div>
+            <div class="section-title" style="color:#7a4e32;">Losers</div>
+            <div class="section-kanji">敗者</div>
+          </div>
+          <div class="rounds">
+            <div class="round">
+              <div class="round-label">Ronda LB 1</div>
+              <div class="mc" style="opacity:.45">
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+                <div class="mc-divider"></div>
+                <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right -->
+      <div class="bracket-right">
+        <div class="champion-card" style="opacity:.35">
+          <div class="champ-label">Campeón 優勝</div>
+          <div class="champ-emoji">🏆</div>
+          <div class="champ-name" style="color:#4a1e08;">—</div>
+        </div>
+        <div class="gf-section">
+          <div class="gf-label">Gran Final</div>
+          <div class="mc" style="opacity:.2">
+            <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+            <div class="mc-divider"></div>
+            <div class="mc-row"><span class="mc-name" style="color:#4a1e08;font-style:italic;">Por definir</span><span class="mc-score muted">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STREAMING BANNER -->
+    <div class="stream-banner">
+      <div class="ticker-track">
+        <div class="ticker-content">
+          <span class="ticker-live"><span class="live-dot" style="background:#ff2200;animation:pulse-dot 1s ease-in-out infinite;width:7px;height:7px;border-radius:50%;display:inline-block;"></span>EN VIVO</span>
+          <span class="ticker-sep">·</span>
+          <span>Shunka Shūtō no Kessen — Torneo de las 4 Estaciones</span>
+          <span class="ticker-sep">·</span>
+          <span>📸 Instagram: <span class="ticker-link">@kidsstop.tcg</span></span>
+          <span class="ticker-sep">·</span>
+          <span>▶ YouTube: <span class="ticker-link">youtube.com/@kidsstoptcg</span></span>
+          <span class="ticker-sep">·</span>
+          <span class="ticker-live"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#ff2200;animation:pulse-dot 1s ease-in-out infinite;"></span>EN VIVO</span>
+          <span class="ticker-sep">·</span>
+          <span>Shunka Shūtō no Kessen — Torneo de las 4 Estaciones</span>
+          <span class="ticker-sep">·</span>
+          <span>📸 Instagram: <span class="ticker-link">@kidsstop.tcg</span></span>
+          <span class="ticker-sep">·</span>
+          <span>▶ YouTube: <span class="ticker-link">youtube.com/@kidsstoptcg</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: DRAFT -->
+<div class="page" id="page-draft">
+  <div class="tv-screen">
+    <div class="draft-overlay">
+      <div>
+        <div class="draft-title">春夏秋冬 · Shunka Shūtō no Kessen</div>
+        <div class="draft-sub" style="text-align:center;margin-top:6px;">Selección de posición en el bracket · Arrastra tu tarjeta</div>
+      </div>
+      <div class="draft-grid">
+        <div class="draft-card"><div class="draft-seed">Seed 1</div><div class="draft-name">Kaito</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 2</div><div class="draft-name">Aoi</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 3</div><div class="draft-name">Hana</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 4</div><div class="draft-name">Ren</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 5</div><div class="draft-name">Sora</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 6</div><div class="draft-name">Yuki</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 7</div><div class="draft-name">Mika</div><div class="draft-arrows">⠿ drag</div></div>
+        <div class="draft-card"><div class="draft-seed">Seed 8</div><div class="draft-name">Taro</div><div class="draft-arrows">⠿ drag</div></div>
+      </div>
+      <div class="draft-hint">El juez arrastra las tarjetas para definir el orden · Se bloquea al iniciar Ronda 1</div>
+      <button class="draft-start-btn">INICIAR TORNEO →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: JUDGE TIMER -->
+<div class="page" id="page-judge-timer">
+  <div style="background:#0d0500;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px;max-width:560px;margin:0 auto;width:100%;">
+
+    <div style="font-family:'Shippori Mincho',serif;font-size:16px;color:#ffd700;font-weight:800;letter-spacing:.06em;">⏱ Timer de Ronda</div>
+
+    <!-- big countdown -->
+    <div style="background:#1f0e04;border:1px solid #4a1e08;border-radius:16px;padding:24px;text-align:center;">
+      <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#7a4e32;margin-bottom:8px;">Tiempo restante</div>
+      <div style="font-family:'Shippori Mincho',serif;font-size:56px;font-weight:800;color:#ffd700;letter-spacing:.05em;line-height:1;text-shadow:0 0 20px #ffd70066;">30:00</div>
+      <div style="font-size:11px;color:#7a4e32;margin-top:6px;letter-spacing:.06em;">Ronda no iniciada</div>
+    </div>
+
+    <!-- preset buttons -->
+    <div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7a4e32;margin-bottom:8px;">Duración</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button style="padding:8px 16px;border-radius:8px;border:1px solid #4a1e08;background:#2a1208;color:#c4916a;font-size:13px;font-weight:700;cursor:pointer;">15 min</button>
+        <button style="padding:8px 16px;border-radius:8px;border:1px solid #ffd70066;background:#2a1208;color:#ffd700;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 0 8px #ffd70033;">25 min</button>
+        <button style="padding:8px 16px;border-radius:8px;border:1px solid #4a1e08;background:#2a1208;color:#c4916a;font-size:13px;font-weight:700;cursor:pointer;">30 min</button>
+        <button style="padding:8px 16px;border-radius:8px;border:1px solid #4a1e08;background:#2a1208;color:#c4916a;font-size:13px;font-weight:700;cursor:pointer;">45 min</button>
+      </div>
+    </div>
+
+    <!-- start/stop -->
+    <div style="display:flex;gap:12px;">
+      <button style="flex:1;padding:16px;border-radius:12px;border:none;background:#ff2200;color:#fff;font-size:16px;font-weight:900;letter-spacing:.1em;cursor:pointer;box-shadow:0 0 16px #ff220066;">
+        ▶ INICIAR RONDA
+      </button>
+      <button style="padding:16px 20px;border-radius:12px;border:1px solid #4a1e08;background:#2a1208;color:#7a4e32;font-size:13px;font-weight:700;cursor:pointer;">
+        ↺ Reset
+      </button>
+    </div>
+
+    <div style="font-size:11px;color:#4a1e08;letter-spacing:.05em;text-align:center;">
+      El timer también se muestra en pantalla TV · Se sincroniza automáticamente
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

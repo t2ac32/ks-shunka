@@ -241,10 +241,15 @@ export const useTournamentStore = create<TournamentStore>()(
         .select('full_name, nickname, decks')
         .eq('tournament_code', code);
       if (error || !data) return { count: 0, loaded: 0 };
-      const existing = new Set(get().t.players.map(p => p.name.toLowerCase()));
       type Row = { full_name: string; nickname: string | null; decks: DeckRef[] };
-      const newPlayers: Player[] = (data as Row[])
-        .filter(r => !existing.has(r.full_name.toLowerCase()))
+      const seen = new Set<string>();
+      const loadedPlayers: Player[] = (data as Row[])
+        .filter(r => {
+          const key = r.full_name.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
         .map(r => ({
           id: 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2),
           name: r.full_name,
@@ -253,9 +258,9 @@ export const useTournamentStore = create<TournamentStore>()(
             Array<DeckRef>(Math.max(0, 4 - (r.decks as DeckRef[]).length)).fill(null)
           ) as [DeckRef, DeckRef, DeckRef, DeckRef],
         }));
-      set(s => { s.t.players.push(...newPlayers); });
+      set(s => { s.t.players = loadedPlayers; });
       persist(get().t);
-      return { count: data.length, loaded: newPlayers.length };
+      return { count: data.length, loaded: loadedPlayers.length };
     },
 
     setTimerDuration(seconds: number) {

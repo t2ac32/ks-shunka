@@ -1,0 +1,286 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Shippori+Mincho:wght@500;700;800&display=swap');
+
+  .preview-wrap { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ── DOTONBORI theme ── */
+  .dt {
+    --bg:        #0d0500;
+    --bg2:       #180a02;
+    --panel:     #1f0e04;
+    --panel2:    #2a1208;
+    --line:      #4a1e08;
+    --line2:     #6b2c0e;
+    --ink:       #ffefd5;
+    --dim:       #c4916a;
+    --faint:     #7a4e32;
+    --accent:    #ff2200;
+    --accent2:   #ffd700;
+    --good:      #39ff14;
+    --bad:       #ff2d55;
+    --glow-red:  0 0 8px #ff220088, 0 0 24px #ff220044;
+    --glow-gold: 0 0 8px #ffd70088, 0 0 24px #ffd70033;
+  }
+
+  /* ── SEASONS theme (existing) ── */
+  .se {
+    --bg:        #0e1220;
+    --bg2:       #141a2c;
+    --panel:     #161c2e;
+    --panel2:    #1e253b;
+    --line:      #2b3450;
+    --line2:     #3a466a;
+    --ink:       #eef1fa;
+    --dim:       #9aa6c6;
+    --faint:     #6b769a;
+    --accent:    #d96a8f;
+    --accent2:   #5fb6a8;
+    --good:      #5fb6a8;
+    --bad:       #e0708a;
+    --glow-red:  none;
+    --glow-gold: none;
+  }
+
+  .theme-card {
+    background: var(--bg);
+    border: 1px solid var(--line2);
+    border-radius: 16px;
+    padding: 20px;
+    width: 340px;
+    flex-shrink: 0;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    color: var(--ink);
+  }
+
+  .theme-label {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 14px;
+  }
+
+  /* header bar sim */
+  .sim-header {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px 10px 0 0;
+    margin: 0 -20px;
+  }
+  .sim-kanji {
+    font-family: 'Shippori Mincho', serif;
+    color: var(--accent2);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+  .sim-nav { display: flex; gap: 4px; }
+  .sim-tab {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    background: var(--panel);
+    color: var(--dim);
+  }
+  .sim-tab.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* match card sim */
+  .sim-match {
+    background: var(--panel2);
+    border-radius: 11px;
+    border: 1px solid var(--line2);
+    padding: 10px 14px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+  .sim-match.live {
+    border-color: var(--accent);
+    box-shadow: var(--glow-red);
+  }
+  .sim-score {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent2);
+  }
+  .sim-player { color: var(--ink); font-weight: 700; font-size: 12px; }
+  .sim-player.losing { color: var(--faint); text-decoration: line-through; }
+
+  /* button sim */
+  .sim-btn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    background: var(--accent2);
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* swatches */
+  .swatches { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .swatch { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.1); }
+
+  /* LIVE badge sim */
+  .sim-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: var(--glow-red);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+
+  /* gold shimmer */
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .sim-gold-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 17px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #b8860b, #ffd700, #ffe87c, #ffd700, #b8860b);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  .selected-badge {
+    display: none;
+    position: absolute;
+    top: 10px; right: 10px;
+    background: #22c55e;
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .option { position: relative; }
+  .option.selected .selected-badge { display: block; }
+</style>
+
+<h2>Diseño visual — elige tu tema base</h2>
+<p class="subtitle">El tema Dotonbori es nuevo. Seasons es el existente. Ambos tendrán las mismas features nuevas.</p>
+
+<div class="preview-wrap">
+
+  <!-- DOTONBORI -->
+  <div class="option dt theme-card" data-choice="dotonbori" onclick="toggleSelect(this)">
+    <div class="selected-badge">✓ Seleccionado</div>
+    <div class="theme-label">🔴 Nuevo — Dotonbori Pachinko Premium</div>
+    <div class="sim-header">
+      <div>
+        <div class="sim-kanji">春夏秋冬</div>
+      </div>
+      <div class="sim-nav">
+        <div class="sim-tab active">Juez</div>
+        <div class="sim-tab">TV</div>
+      </div>
+      <div class="sim-live"><div class="live-dot"></div>EN VIVO</div>
+    </div>
+    <div style="margin-top: 14px;">
+      <div class="sim-gold-title">Shunka Shūtō no Kessen</div>
+    </div>
+    <div class="sim-match live">
+      <div>
+        <div class="sim-player">Kaito</div>
+        <div class="sim-player losing">Ren</div>
+      </div>
+      <div class="sim-score">2 · 0</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:700;">Bo3 en juego</div>
+    </div>
+    <div class="sim-match" style="opacity:.6">
+      <div>
+        <div class="sim-player">Aoi</div>
+        <div class="sim-player">Hana</div>
+      </div>
+      <div class="sim-score" style="color:var(--dim);">— · —</div>
+      <div style="font-size:11px;color:var(--dim);">Baneo pendiente</div>
+    </div>
+    <div class="sim-btn">Iniciar torneo →</div>
+    <div class="swatches" style="margin-top:14px;">
+      <div class="swatch" style="background:#0d0500" title="bg"></div>
+      <div class="swatch" style="background:#1f0e04" title="panel"></div>
+      <div class="swatch" style="background:#ff2200" title="accent rojo"></div>
+      <div class="swatch" style="background:#ffd700" title="accent dorado"></div>
+      <div class="swatch" style="background:#ffefd5" title="ink"></div>
+      <div class="swatch" style="background:#39ff14" title="good neon"></div>
+    </div>
+  </div>
+
+  <!-- SEASONS (existing) -->
+  <div class="option se theme-card" data-choice="seasons" onclick="toggleSelect(this)">
+    <div class="selected-badge">✓ Seleccionado</div>
+    <div class="theme-label">🔵 Existente — 4 Estaciones (sin cambios)</div>
+    <div class="sim-header">
+      <div>
+        <div class="sim-kanji">春夏秋冬</div>
+      </div>
+      <div class="sim-nav">
+        <div class="sim-tab active">Juez</div>
+        <div class="sim-tab">TV</div>
+      </div>
+    </div>
+    <div style="margin-top: 14px;">
+      <div style="font-family:'Shippori Mincho',serif;font-size:17px;font-weight:800;color:var(--accent2);">Shunka Shūtō no Kessen</div>
+    </div>
+    <div class="sim-match live" style="--glow-red: 0 0 8px #d96a8f88;">
+      <div>
+        <div class="sim-player">Kaito</div>
+        <div class="sim-player losing">Ren</div>
+      </div>
+      <div class="sim-score">2 · 0</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:700;">Bo3 en juego</div>
+    </div>
+    <div class="sim-match" style="opacity:.6">
+      <div>
+        <div class="sim-player">Aoi</div>
+        <div class="sim-player">Hana</div>
+      </div>
+      <div class="sim-score" style="color:var(--dim);">— · —</div>
+      <div style="font-size:11px;color:var(--dim);">Baneo pendiente</div>
+    </div>
+    <div class="sim-btn" style="background:var(--accent2);color:#0b0f1a;">Iniciar torneo →</div>
+    <div class="swatches" style="margin-top:14px;">
+      <div class="swatch" style="background:#0e1220"></div>
+      <div class="swatch" style="background:#161c2e"></div>
+      <div class="swatch" style="background:#d96a8f"></div>
+      <div class="swatch" style="background:#5fb6a8"></div>
+      <div class="swatch" style="background:#eef1fa"></div>
+      <div class="swatch" style="background:#5fb6a8"></div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Haz clic en el que prefieras. Podemos ajustar tonos después.</p>
